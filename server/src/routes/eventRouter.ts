@@ -5,7 +5,7 @@ const { verifyAccessToken, isAdmin, isOrganizer} = require('../middlewares/verif
 
 router.post('/', [verifyAccessToken] ,ctrls.createEvent);
 router.get('/', ctrls.getAllEvents)
-router.get('/get-event/:id',[verifyAccessToken, isOrganizer], ctrls.readEvent);
+router.get('/:id', verifyAccessToken, ctrls.readEvent);
 router.put('/:id',[verifyAccessToken, isOrganizer], ctrls.updateEvent);
 
 router.get('/statistic/event', [verifyAccessToken, isOrganizer], ctrls.staticEventFollowByMonth);
