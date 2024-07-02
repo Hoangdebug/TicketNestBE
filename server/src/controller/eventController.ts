@@ -25,6 +25,7 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         created_by: _id
     });
     await event.save();
+    console.log(event)
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
