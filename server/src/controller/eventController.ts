@@ -25,7 +25,6 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         created_by: _id
     });
     await event.save();
-    console.log(event)
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
@@ -39,6 +38,17 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const event = await Event.findById(id);
 
+    return res.status(200).json({
+        status: event ? true : false,
+        code: event ? 200 : 404,
+        message: event ? 'Get event information successfully' : 'Event not found',
+        result: event
+    });
+})
+
+const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) =>{
+    const { _id } = req.user
+    const event = await Event.find({created_by: _id});
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 404,
@@ -175,5 +185,6 @@ module.exports = {
     getAllEvents,
     updateEvent,
     staticEventFollowByMonth,
+    getEventByOrganizer,
     // getTotalOrderByMonth,
 }
