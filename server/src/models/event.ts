@@ -1,3 +1,4 @@
+import { timeStamp } from "console";
 import { EventTicket, EventType } from "~/utils/Common/enum";
 
 const mongoose = require('mongoose'); // Erase if already required
@@ -51,7 +52,7 @@ var eventSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }
-});
+},{timeStamp: true});
 
 //Export the model
 module.exports = mongoose.model('Event', eventSchema);
