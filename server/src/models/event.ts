@@ -1,58 +1,72 @@
-import { timeStamp } from "console";
-import { EventTicket, EventType } from "~/utils/Common/enum";
+import { EventStatus, EventTicket, EventType } from "~/utils/Common/enum";
+import mongoose, { Document, Model, Schema } from 'mongoose'; // Erase if already required
 
-const mongoose = require('mongoose'); // Erase if already required
+export interface IEvent extends Document {
+    name: string;
+    description: string;
+    image: string;
+    day_start: Date;
+    day_end: Date;
+    ticket_number?: EventTicket;
+    price: number;
+    location: string;
+    event_type: EventType;
+    status: EventStatus
+    created_by: mongoose.Types.ObjectId;
+}
 
 // Declare the Schema of the Mongo model
-var eventSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
+var eventSchema: Schema<IEvent> = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
     },
-    description:{
-        type:String,
-        required:true,
+    description: {
+        type: String,
+        required: true,
     },
-    image:{
-        type:String,
-        required:true,
+    image: {
+        type: String,
+        required: true,
     },
-    day_start:{
-        type:Date,
-        required:true,
+    day_start: {
+        type: Date,
+        required: true,
     },
-    day_end:{
-        type:Date,
-        required:true,
+    day_end: {
+        type: Date,
+        required: true,
     },
-    ticket_number:{
-        type:String,
+    ticket_number: {
+        type: String,
         enum: EventTicket,
         default: null,
     },
-    price:{
-        type:Number,
-        required:true,
+    price: {
+        type: Number,
+        required: true,
     },
-    location:{
-        type:String,
-        required:true,
+    location: {
+        type: String,
+        required: true,
     },
-    event_type:{
-        type:String,
+    event_type: {
+        type: String,
         enum: EventType,
-        default: null,
+        required: true
     },
-    status:{
-        type:String,
-        default: 'Pending',
-        enum:['Cancelled', 'Pending', 'Successed']
+    status: {
+        type: String,
+        default: EventStatus.PENDING,
+        enum: EventStatus
     },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     }
-},{timeStamp: true});
+}, { timestamps: true, collection: "events" });
 
 //Export the model
-module.exports = mongoose.model('Event', eventSchema);
+const EventModel: Model<IEvent> = mongoose.model("EventModel", eventSchema)
+
+export default EventModel
