@@ -47,6 +47,15 @@ const login = asyncHandler( async (req: Request, res: Response) => {
     })
 
     const response = await User.findOne({ email })
+    if(response.isBlocked==true){
+        return res.status(401).json({
+            status: false,
+            code: 401,
+            message: 'Account is blocked',
+            result: 'Invalid information'
+        })
+    }
+
     if(response && await response.isCorrectPassword(password)){
         //Tách password và role ra khỏi response
         const { password, role, refreshToken, ...userData } = response.toObject()
@@ -209,7 +218,15 @@ const resetPassword = asyncHandler(async(req: Request, res: Response) => {
 
 //Lấy tất cả người dùng
 const getAllUser = asyncHandler(async(req: Request, res: Response) => {
-    const response = await User.find().select('-refreshToken -password -role')
+    const response = await User.find().select('-refreshToken -password -role').populate({
+        path: '_id',
+        model: 'Organize',
+        populate: {
+            path: 'sponsor_by',
+            select: 'name description contact_email contact_phone',
+            model: 'User'
+        }
+    });
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400, 
@@ -329,7 +346,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
     const response = await User.findById(uid)
     if(!response) throw new Error('User not found')
     
-    if(response.organizerRequest = 'Processing'){
+    if(response.organizerRequest == 'Processing'){
         if( permit == 'Accepted')
             response.role = "ROLE_ORGANIZER"
             response.type = "Organizer"
