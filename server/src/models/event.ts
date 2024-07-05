@@ -18,11 +18,11 @@ var eventSchema = new mongoose.Schema({
         required:true,
     },
     day_start:{
-        type:Date,
+        type:String,
         required:true,
     },
     day_end:{
-        type:Date,
+        type:String,
         required:true,
     },
     ticket_number:{

@@ -3,8 +3,8 @@ import { Request, Response } from 'express';
 import moment from 'moment';
 const asyncHandler = require("express-async-handler")
 const Event = require('../models/event')
-const Order = require('../models/order');
-const Organize = require('../models/organizer');
+const User = require('../models/user');
+const Organizer = require('../models/organizer');
 const mongoose = require('mongoose');
 
 //Create Event
@@ -35,14 +35,17 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
 
 //Read Event
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const event = await Event.findById(id);
+    const { uid } = req.params;
+    const event = await Event.findById(uid)
+    const user = await User.findById(event.created_by)
+    const organizer = await Organizer.findById({ sponsor_by: user._id });
+    const eventResult = {event, organizer_by: organizer.name}
 
     return res.status(200).json({
-        status: event ? true : false,
-        code: event ? 200 : 404,
-        message: event ? 'Get event information successfully' : 'Event not found',
-        result: event
+        status: eventResult ? true : false,
+        code: eventResult ? 200 : 404,
+        message: eventResult ? 'Get event information successfully' : 'Event not found',
+        result: eventResult
     });
 })
 
