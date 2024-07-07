@@ -86,7 +86,7 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
         }
     }
 
-    const result = await getAllWithPagination<IEvent>(EventModel,
+    const response = await getAllWithPagination<IEvent>(EventModel,
         {
             page: page as number,
             pageSize: pageSize as number,
@@ -95,10 +95,10 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
     )
 
     return res.status(200).json({
-        status: result ? true : false,
-        code: result ? 200 : 400,
-        message: result ? 'Get all events successfully' : 'Failed to get all events',
-        result
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? 'Get all events successfully' : 'Failed to get all events',
+        result: response
     })
 })
 
