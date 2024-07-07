@@ -39,9 +39,9 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
-    const event = await EventModel.findById(id);
     const { uid } = req.params;
-    const user = await User.findById(event.created_by)
+    const event = await EventModel.findById(uid);
+    const user = await User.findById(event?.created_by)
     const organizer = await Organizer.findById({ sponsor_by: user._id });
     const eventResult = {event, organizer_by: organizer.name}
 
