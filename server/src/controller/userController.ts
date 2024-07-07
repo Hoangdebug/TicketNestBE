@@ -218,15 +218,7 @@ const resetPassword = asyncHandler(async(req: Request, res: Response) => {
 
 //Lấy tất cả người dùng
 const getAllUser = asyncHandler(async(req: Request, res: Response) => {
-    const response = await User.find().select('-refreshToken -password -role').populate({
-        path: '_id',
-        model: 'Organize',
-        populate: {
-            path: 'sponsor_by',
-            select: 'name description contact_email contact_phone',
-            model: 'User'
-        }
-    });
+    const response = await User.find().select('-refreshToken -password -role')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400, 
@@ -325,12 +317,13 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
 
     if(user.organizerRequest == 'Processing' ) throw new Error(' You have already requested to become an organizer') 
     if(!req.body) throw new Error(`Please check your request ${req.body}`)
-    user.organizerRequest = 'Processing'
+    user.organizerRequest = 'Processing' 
     await user.save()
     const response = await Organizer.create({name: name, description: description, 
         contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id
     })
-    console.log(response)
+    user.organizer_id = response.organizer._id
+    await user.save()
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
