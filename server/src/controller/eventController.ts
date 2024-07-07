@@ -6,7 +6,9 @@ import { getAllWithPagination } from '~/core/pagination';
 import EventModel, { IEvent } from '~/models/event';
 const asyncHandler = require("express-async-handler")
 const Order = require('../models/order');
-const Organize = require('../models/organizer');
+const Event = require('../models/event')
+const User = require('../models/user');
+const Organizer = require('../models/organizer');
 const mongoose = require('mongoose');
 
 //Create EventModel
@@ -37,14 +39,17 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
     const event = await EventModel.findById(id);
+    const { uid } = req.params;
+    const user = await User.findById(event.created_by)
+    const organizer = await Organizer.findById({ sponsor_by: user._id });
+    const eventResult = {event, organizer_by: organizer.name}
 
     return res.status(200).json({
-        status: event ? true : false,
-        code: event ? 200 : 404,
-        message: event ? 'Get event information successfully' : 'Event not found',
-        result: event
+        status: eventResult ? true : false,
+        code: eventResult ? 200 : 404,
+        message: eventResult ? 'Get event information successfully' : 'Event not found',
+        result: eventResult
     });
 })
 
