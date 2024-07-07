@@ -1,17 +1,21 @@
 import { count } from 'console';
 import { Request, Response } from 'express';
 import moment from 'moment';
+import { FilterQuery } from 'mongoose';
+import { getAllWithPagination } from '~/core/pagination';
+import EventModel, { IEvent } from '~/models/event';
 const asyncHandler = require("express-async-handler")
+const Order = require('../models/order');
 const Event = require('../models/event')
 const User = require('../models/user');
 const Organizer = require('../models/organizer');
 const mongoose = require('mongoose');
 
-//Create Event
+//Create EventModel
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
     const { name, description, image, day_start, day_end, ticket_number, price, location, status, event_type } = req.body;
-    const event = new Event({
+    const event = new EventModel({
         name,
         description,
         image,
@@ -33,10 +37,10 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
     });
 })
 
-//Read Event
+//Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
+    const event = await EventModel.findById(id);
     const { uid } = req.params;
-    const event = await Event.findById(uid)
     const user = await User.findById(event.created_by)
     const organizer = await Organizer.findById({ sponsor_by: user._id });
     const eventResult = {event, organizer_by: organizer.name}
@@ -49,9 +53,9 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
     });
 })
 
-const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) =>{
+const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user
-    const event = await Event.find({created_by: _id});
+    const event = await EventModel.find({ created_by: _id });
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 404,
@@ -61,21 +65,49 @@ const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) =>{
 })
 
 const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
-    const response = await Event.find()
+    const response = await EventModel.find()
     return res.status(200).json({
-        status: response? true : false,
-        code: response? 200 : 400,
-        message: response? 'Get all events successfully' : 'Failed to get all events',
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? 'Get all events successfully' : 'Failed to get all events',
         result: response
     })
 })
 
-//Update Event
+const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Response) => {
+    const { page = 1, pageSize = 20, type } = req.query;
+
+    let findCondition: FilterQuery<IEvent> = {}
+
+    if (type) {
+        findCondition = {
+            ...findCondition,
+            event_type: type
+        }
+    }
+
+    const result = await getAllWithPagination<IEvent>(EventModel,
+        {
+            page: page as number,
+            pageSize: pageSize as number,
+            findCondition,
+        }
+    )
+
+    return res.status(200).json({
+        status: result ? true : false,
+        code: result ? 200 : 400,
+        message: result ? 'Get all events successfully' : 'Failed to get all events',
+        result
+    })
+})
+
+//Update EventModel
 const updateEvent = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const event = await Event.findByIdAndUpdate(id, updates, { new: true });
+    const event = await EventModel.findByIdAndUpdate(id, updates, { new: true });
 
     return res.status(200).json({
         status: event ? true : false,
@@ -85,9 +117,9 @@ const updateEvent = asyncHandler(async (req: Request, res: Response) => {
     });
 })
 
-//Static Event By Month
+//Static EventModel By Month
 const staticEventFollowByMonth = asyncHandler(async (req: Request, res: Response) => {
-    const events = await Event.aggregate([
+    const events = await EventModel.aggregate([
         {
             $group: {
                 _id: { $month: "$time" },
@@ -182,12 +214,13 @@ const staticEventFollowByMonth = asyncHandler(async (req: Request, res: Response
 
 
 
-module.exports = {
+export {
     createEvent,
     readEvent,
     getAllEvents,
     updateEvent,
     staticEventFollowByMonth,
     getEventByOrganizer,
+    getAllEventsWithPagination
     // getTotalOrderByMonth,
 }

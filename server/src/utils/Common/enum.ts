@@ -1,10 +1,10 @@
-export enum Role{
+export enum Role {
     ROLE_USER = 'ROLE_USER',
     ROLE_ADMIN = 'ROLE_ADMIN',
     ROLE_ORGANIZER = 'ROLE_ORGANIZER',
 }
 
-export enum TypeUser{
+export enum TypeUser {
     USER = 'User',
     ADMIN = 'Admin',
     ORGANIZER = 'Organizer',
@@ -26,4 +26,10 @@ export enum EventType {
     MUSIC = 'Music',
     DRAMATIC = 'Dramatic',
     WORKSHOP = 'Workshop',
+}
+
+export enum EventStatus {
+    CANCELLED = "Cancelled",
+    PENDING = "Pending",
+    SUCCESSED = "Successed",
 }
