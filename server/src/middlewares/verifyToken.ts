@@ -39,7 +39,7 @@ const isAdmin = asyncHandler((req: CustomRequest, res: Response, next: NextFunct
 
 const isOrganizer = asyncHandler((req: CustomRequest, res: Response, next: NextFunction) => {
     const {role} = req.user
-    if(role!== 'ROLE_ORGANIZER')
+    if(!role.includes(Role.ROLE_ORGANIZER))
     return res.status(401).json({
         success: false,
         mes: 'Require organizer authority to access this page'

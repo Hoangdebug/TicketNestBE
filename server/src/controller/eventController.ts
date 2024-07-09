@@ -66,7 +66,7 @@ const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => 
 })
 
 const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
-    const response = await EventModel.find().populate('')
+    const response = await EventModel.find().populate('created_by')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,

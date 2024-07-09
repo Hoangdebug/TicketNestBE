@@ -15,6 +15,7 @@ router.put('/resetpassword', ctrls.resetPassword)
 router.get('/', [verifyAccessToken, isAdmin] , ctrls.getAllUser)
 router.put('/current', [verifyAccessToken] , ctrls.updateUser)
 //getuserbyid
+router.post('/create-account-by-admin',[verifyAccessToken, isAdmin], ctrls.createAccountbyAdmin)
 router.put('/:id', [verifyAccessToken, isAdmin] , ctrls.updateUserbyAdmin)
 router.put('/ban/:uid',[verifyAccessToken, isAdmin] ,ctrls.banUserByAdmin)
 router.put('/role/:uid',[verifyAccessToken, isAdmin] , ctrls.organizerPermitByAdmin)

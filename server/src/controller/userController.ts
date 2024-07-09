@@ -254,7 +254,7 @@ const updateUser = asyncHandler(async(req: Request, res: Response) => {
 })
 
 //Tạo tài khoản người dùng bởi admin
-const createUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
+const createAccountbyAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { username, email, password, role } = req.body
     if(Object.keys(req.body).length === 0) throw new Error('Please modified information!!!')
     const response = await User.create(username, email, password, role)
@@ -382,6 +382,7 @@ module.exports = {
     getAllUser,
     deleteUser,
     updateUser,
+    createAccountbyAdmin,
     updateUserbyAdmin,
     banUserByAdmin,
     uploadImage,
