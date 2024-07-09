@@ -11,7 +11,7 @@ cloudinary.config({
 });
 
 const folderStorage = (req: Request, res: Response) => {
-    if(req.body.type === 'USER')return 'users';
+    if(req.body.type === 'USER')return 'Users';
     
     return 'Event';
 };
