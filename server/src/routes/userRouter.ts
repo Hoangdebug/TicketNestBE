@@ -15,8 +15,8 @@ router.put('/resetpassword', ctrls.resetPassword)
 router.get('/', [verifyAccessToken, isAdmin] , ctrls.getAllUser)
 router.put('/current', [verifyAccessToken] , ctrls.updateUser)
 //getuserbyid
-router.put('/:uid', [verifyAccessToken, isAdmin] , ctrls.updateUserbyAdmin)
+router.put('/:id', [verifyAccessToken, isAdmin] , ctrls.updateUserbyAdmin)
 router.put('/ban/:uid',[verifyAccessToken, isAdmin] ,ctrls.banUserByAdmin)
 router.put('/role/:uid',[verifyAccessToken, isAdmin] , ctrls.organizerPermitByAdmin)
-router.put('uploadimage/:uid',[verifyAccessToken], uploader.array('images', 10), ctrls.uploadImage)
+router.put('uploadimage/:id',[verifyAccessToken], uploader.array('images', 10), ctrls.uploadImage)
 module.exports = router

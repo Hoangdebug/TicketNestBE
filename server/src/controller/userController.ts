@@ -253,6 +253,20 @@ const updateUser = asyncHandler(async(req: Request, res: Response) => {
     })
 })
 
+//Tạo tài khoản người dùng bởi admin
+const createUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
+    const { username, email, password, role } = req.body
+    if(Object.keys(req.body).length === 0) throw new Error('Please modified information!!!')
+    const response = await User.create(username, email, password, role)
+    return res.status(200).json({
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? `User with email ${response.email} had been updated` : 'Update user failed',
+        result: response ? response : 'Something went wrong!!!!',
+    })
+})
+
+
 //Cập nhập tài khoản người dùng bởi admin
 const updateUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { _id } = req.params
@@ -268,9 +282,11 @@ const updateUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
 
 //Cấm tài khoản người dùng bởi user
 const banUserByAdmin = asyncHandler(async(req: Request, res: Response) => {
-    const { _id } = req.params
-    if(!_id) throw new Error('Please modified Id!!!')
-    const response = await User.findByIdAndUpdate(_id, {isBlocked: true}, {new: true}).select('-password -role -refreshToken')
+    const { uid } = req.params
+    if(!uid) throw new Error('Please modified Id!!!')
+    const user = await User.findById(uid).select('-password -role -refreshToken')
+    const isBlocked = !user.isBlocked
+    const response = await User.findByIdAndUpdate(uid, {isBlocked}, {new: true}).select('-password -role -refreshToken')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
@@ -283,7 +299,7 @@ const banUserByAdmin = asyncHandler(async(req: Request, res: Response) => {
 const uploadImage= asyncHandler(async(req: Request, res: Response) => {
     const { _id } = req.params
     if(!req.files) throw new Error('Missing input files')
-    const response = await User.findByIdAndUpdate(_id, {$push: {image: {$each: req.files.map((el: {path: string}) => el.path)}}}, {new: true})
+    const response = await User.findByIdAndUpdate(_id, {$push: {image: req.files?.path}}, {new: true})
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
