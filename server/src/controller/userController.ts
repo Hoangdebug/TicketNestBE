@@ -257,7 +257,7 @@ const updateUser = asyncHandler(async(req: Request, res: Response) => {
 const createAccountbyAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { username, email, password, role } = req.body
     if(Object.keys(req.body).length === 0) throw new Error('Please modified information!!!')
-    const response = await User.create(username, email, password, role)
+    const response = await User.create({username, email, password, role})
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
