@@ -68,7 +68,7 @@ const crypto = require('crypto')
             enum: Status,
             default: null,
         },
-        organizer_id:{
+        organizerRef:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Organizer',
         }   

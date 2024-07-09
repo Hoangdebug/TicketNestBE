@@ -62,7 +62,7 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
     },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Organizer',
     }
 }, { timestamps: true, collection: "events" });
 

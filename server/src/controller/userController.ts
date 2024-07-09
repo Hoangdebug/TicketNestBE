@@ -81,7 +81,7 @@ const login = asyncHandler( async (req: Request, res: Response) => {
 
 const getCurrent = asyncHandler( async (req: Request, res: Response) => {
     const { _id } = req.user
-    const user = await User.findById(_id).select('-refreshToken -password')
+    const user = await User.findById(_id).select('-refreshToken -password').populate('organizerRef')
     return res.status(200).json({
         status: user ? true : false,
         code: user ? 200 : 400,
@@ -218,7 +218,7 @@ const resetPassword = asyncHandler(async(req: Request, res: Response) => {
 
 //Lấy tất cả người dùng
 const getAllUser = asyncHandler(async(req: Request, res: Response) => {
-    const response = await User.find().select('-refreshToken -password -role')
+    const response = await User.find().select('-refreshToken -password -role').populate('organizerRef')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400, 
@@ -320,9 +320,8 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
     user.organizerRequest = 'Processing' 
     await user.save()
     const response = await Organizer.create({name: name, description: description, 
-        contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id
-    })
-    user.organizer_id = response.organizer._id
+        contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id})
+    user.organizerRef = response._id
     await user.save()
     return res.status(200).json({
         status: response ? true : false,
