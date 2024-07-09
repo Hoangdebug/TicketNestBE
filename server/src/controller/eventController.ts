@@ -55,8 +55,9 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
-    const { _id } = req.user
-    const event = await EventModel.find({ created_by: _id });
+    const { _id } = req.user;
+    const organizer = await Organizer.findOne({sponsor_by: _id });
+    const event = await EventModel.find({ created_by: organizer._id }).populate('created_by');
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 404,
