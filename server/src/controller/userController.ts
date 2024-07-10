@@ -297,9 +297,9 @@ const banUserByAdmin = asyncHandler(async(req: Request, res: Response) => {
 
 
 const uploadImage= asyncHandler(async(req: Request, res: Response) => {
-    const { _id } = req.params
-    if(!req.files) throw new Error('Missing input files')
-    const response = await User.findByIdAndUpdate(_id, {$push: {image: req.files?.path}}, {new: true})
+    const { _id } = req.user
+    if(!req.file) throw new Error('Missing input files')
+    const response = await User.findByIdAndUpdate(_id, {$set: {images: req.file?.path}}, {new: true})
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
