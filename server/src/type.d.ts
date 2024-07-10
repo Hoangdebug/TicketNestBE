@@ -1,15 +1,25 @@
-declare namespace Express {
-  import { User } from './models/user';
-  import { Event } from './models/event';
-  import { Ticket } from './models/ticket';
-  import { Order } from './models/order';
+import { Request } from 'express';
+declare global {
+  namespace Express {
+    interface MulterFile {
+      fieldname: string;
+      originalname: string;
+      encoding: string;
+      mimetype: string;
+      size: number;
+      destination: string;
+      filename: string;
+      path: string;
+      buffer: Buffer;
+    }
 
-  export interface Request {
-    user?: User;
-    files?: any;
-    event? : Event;
-    ticket? : Ticket;
-    order? : Order;
-    seat?: Seat;
+    interface Request {
+      file?: MulterFile;
+      user?: User;
+      event?: Event;
+      ticket?: Ticket;
+      order?: Order;
+      seat?: Seat;
+    }
   }
 }

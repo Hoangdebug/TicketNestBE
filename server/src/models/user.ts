@@ -11,7 +11,6 @@ const crypto = require('crypto')
         },
         dob:{
             type:String,
-            required:true,
         },
         email:{
             type:String,
@@ -23,13 +22,11 @@ const crypto = require('crypto')
         },
         gender:{
             type:String,
-            required:true,
             enum:['Male', 'Female', 'Other'],
             default:'Other',
         },
         phone:{
             type:String,
-            required:true,
             unique:true,
         },
         password:{
@@ -68,7 +65,7 @@ const crypto = require('crypto')
             enum: Status,
             default: null,
         },
-        organizer_id:{
+        organizerRef:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Organizer',
         }   

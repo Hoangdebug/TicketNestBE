@@ -81,7 +81,7 @@ const login = asyncHandler( async (req: Request, res: Response) => {
 
 const getCurrent = asyncHandler( async (req: Request, res: Response) => {
     const { _id } = req.user
-    const user = await User.findById(_id).select('-refreshToken -password')
+    const user = await User.findById(_id).select('-refreshToken -password').populate('organizerRef')
     return res.status(200).json({
         status: user ? true : false,
         code: user ? 200 : 400,
@@ -218,7 +218,7 @@ const resetPassword = asyncHandler(async(req: Request, res: Response) => {
 
 //Lấy tất cả người dùng
 const getAllUser = asyncHandler(async(req: Request, res: Response) => {
-    const response = await User.find().select('-refreshToken -password -role')
+    const response = await User.find().select('-refreshToken -password -role').populate('organizerRef')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400, 
@@ -253,6 +253,20 @@ const updateUser = asyncHandler(async(req: Request, res: Response) => {
     })
 })
 
+//Tạo tài khoản người dùng bởi admin
+const createAccountbyAdmin = asyncHandler(async(req: Request, res: Response) => {
+    const { username, email, password, role } = req.body
+    if(Object.keys(req.body).length === 0) throw new Error('Please modified information!!!')
+    const response = await User.create({username, email, password, role})
+    return res.status(200).json({
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? `User with email ${response.email} had been updated` : 'Update user failed',
+        result: response ? response : 'Something went wrong!!!!',
+    })
+})
+
+
 //Cập nhập tài khoản người dùng bởi admin
 const updateUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { _id } = req.params
@@ -268,9 +282,11 @@ const updateUserbyAdmin = asyncHandler(async(req: Request, res: Response) => {
 
 //Cấm tài khoản người dùng bởi user
 const banUserByAdmin = asyncHandler(async(req: Request, res: Response) => {
-    const { _id } = req.params
-    if(!_id) throw new Error('Please modified Id!!!')
-    const response = await User.findByIdAndUpdate(_id, {isBlocked: true}, {new: true}).select('-password -role -refreshToken')
+    const { uid } = req.params
+    if(!uid) throw new Error('Please modified Id!!!')
+    const user = await User.findById(uid).select('-password -role -refreshToken')
+    const isBlocked = !user.isBlocked
+    const response = await User.findByIdAndUpdate(uid, {isBlocked}, {new: true}).select('-password -role -refreshToken')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
@@ -281,9 +297,9 @@ const banUserByAdmin = asyncHandler(async(req: Request, res: Response) => {
 
 
 const uploadImage= asyncHandler(async(req: Request, res: Response) => {
-    const { _id } = req.params
-    if(!req.files) throw new Error('Missing input files')
-    const response = await User.findByIdAndUpdate(_id, {$push: {image: {$each: req.files.map((el: {path: string}) => el.path)}}}, {new: true})
+    const { _id } = req.user
+    if(!req.file) throw new Error('Missing input files')
+    const response = await User.findByIdAndUpdate(_id, {$set: {images: req.file?.path}}, {new: true})
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
@@ -322,9 +338,8 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
     user.organizerRequest = 'Processing' 
     await user.save()
     const response = await Organizer.create({name: name, description: description, 
-        contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id
-    })
-    user.organizer_id = response.organizer._id
+        contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id})
+    user.organizerRef = response._id
     await user.save()
     return res.status(200).json({
         status: response ? true : false,
@@ -406,6 +421,7 @@ module.exports = {
     getAllUser,
     deleteUser,
     updateUser,
+    createAccountbyAdmin,
     updateUserbyAdmin,
     banUserByAdmin,
     uploadImage,

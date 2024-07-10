@@ -29,6 +29,17 @@ const getOrganizer = asyncHandler(async (req: Request, res: Response) => {
     })
 })
 
+
+// 
+const getAllOrganizer = asyncHandler(async (req: Request, res: Response) =>{
+    const response = await organizer.find();
+    return res.status(200).json({
+        status: response? true : false,
+        code: response? 200 : 404,
+        message: response? 'Get all organizers successfully' : 'Failed to get all organizers',
+        result: response
+    })
+})
 // function to update one Seat
 
 const updateOrganizer = asyncHandler(async (req: Request, res: Response) => {
@@ -72,5 +83,6 @@ module.exports ={
     getOrganizer,
     updateOrganizer,
     staticOrganizer,
-    staticUser
+    staticUser,
+    getAllOrganizer
 }

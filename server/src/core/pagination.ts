@@ -14,7 +14,7 @@ export type PaginationResult<T> = {
         currentPage: number,
         totalItems: number,
     }
-    result: T[]
+    dataEvent: T[]
 }
 export const getAllWithPagination = async <T extends Document>(
     model: Model<T>,
@@ -45,6 +45,6 @@ export const getAllWithPagination = async <T extends Document>(
             pageSize,
             totalItems
         },
-        result: data
+        dataEvent: data
     }
 } 

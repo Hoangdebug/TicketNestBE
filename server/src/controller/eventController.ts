@@ -18,6 +18,7 @@ import multer from 'multer';
 //Create EventModel
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
+    const user = await User.findById(_id)
     const { name, description, image, day_start, day_end, ticket_number, price, location, status, event_type } = req.body;
     const event = new EventModel({
         name,
@@ -30,9 +31,10 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         location,
         status,
         event_type,
-        created_by: _id
+        created_by: user.organizerRef
     });
     await event.save();
+    console.log(event)
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
@@ -47,19 +49,20 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
     const event = await EventModel.findById(uid);
     const user = await User.findById(event?.created_by)
     const organizer = await Organizer.findById({ sponsor_by: user._id });
-    const eventResult = { event, organizer_by: organizer.name }
+    const eventResult = {event, organizer_by: organizer.name}
 
     return res.status(200).json({
-        status: eventResult ? true : false,
-        code: eventResult ? 200 : 404,
-        message: eventResult ? 'Get event information successfully' : 'Event not found',
-        result: eventResult
+        status: event ? true : false,
+        code: event ? 200 : 404,
+        message: event ? 'Get event information successfully' : 'Event not found',
+        result: event
     });
 })
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
-    const { _id } = req.user
-    const event = await EventModel.find({ created_by: _id });
+    const { _id } = req.user;
+    const organizer = await Organizer.findOne({sponsor_by: _id });
+    const event = await EventModel.find({ created_by: organizer._id }).populate('created_by');
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 404,
@@ -69,7 +72,7 @@ const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => 
 })
 
 const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
-    const response = await EventModel.find()
+    const response = await EventModel.find().populate('created_by')
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
