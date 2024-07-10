@@ -1,16 +1,18 @@
 import express from 'express'
-import { createEvent, getAllEvents, getAllEventsWithPagination, getEventByOrganizer, readEvent, staticEventFollowByMonth, updateEvent } from '~/controller/eventController';
+const ctrls = require('../controller/eventController')
 const router = express.Router()
 const { verifyAccessToken, isAdmin, isOrganizer } = require('../middlewares/verifyToken')
+const uploader = require('../config/cloudinary.config')
 
 
-router.post('/', [verifyAccessToken], createEvent);
-router.get('/all', getAllEvents)
-router.get('/get-event', [verifyAccessToken, isOrganizer], getEventByOrganizer);
-router.get('/statistic/event', [verifyAccessToken, isOrganizer], staticEventFollowByMonth);
-router.get('/:id', verifyAccessToken, readEvent);
-router.put('/:id', [verifyAccessToken, isOrganizer], updateEvent);
-router.get('/', getAllEventsWithPagination)
+router.post('/', [verifyAccessToken], ctrls.createEvent);
+router.get('/all', ctrls.getAllEvents)
+router.get('/get-event', [verifyAccessToken, isOrganizer], ctrls.getEventByOrganizer);
+router.get('/statistic/event', [verifyAccessToken, isOrganizer], ctrls.staticEventFollowByMonth);
+router.get('/:id', verifyAccessToken, ctrls.readEvent);
+router.put('/:id', [verifyAccessToken, isOrganizer], ctrls.updateEvent);
+router.get('/', ctrls.getAllEventsWithPagination)
+router.put('/uploadimage/:id',[verifyAccessToken], uploader.array('images', 10), ctrls.uploadImage)
 
 
 // router.get('/statistic/:organizerId', [verifyAccessToken, isOrganizer], getTotalOrderByMonth);
