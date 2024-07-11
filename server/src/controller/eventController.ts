@@ -80,7 +80,7 @@ const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
 
 const updateEventsStatus = asyncHandler(async (req: Request, res: Response) => {
     const { eid } = req.params;
-    const status = req.body
+    const {status} = req.body
     console.log(eid)
     const response = await EventModel.findByIdAndUpdate(eid, {status: status}, {new: true}).populate('created_by');
     return res.status(200).json({
