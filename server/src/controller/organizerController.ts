@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 //function to creat organizer
 
 const createOrganizer = asyncHandler(async(req: Request, res: Response) =>{
-    if(Object.keys(req.body).length = 0) throw new Error("Missing input");
+    if(Object.keys(req.body).length == 0) throw new Error("Missing input");
     const  newOrganizer = await organizer.create(req.body)
     return res.status(200).json({
         status: newOrganizer ? true : false,
