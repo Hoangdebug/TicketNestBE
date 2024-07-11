@@ -361,16 +361,29 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
             response.role = "ROLE_ORGANIZER"
             response.type = "Organizer"
             response.organizerRequest = permit
-            const html = `
+            await response.save()
+    }
+    //Send mail
+    const html = `
     <div style="font-family: Arial, sans-serif; padding: 48px;">
     <img style="width: 100%; height: 100%;" src="" alt="Logo" />
     <div style="padding: 10px; gap: 32px;">
         <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${response.username},</h1>
         <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
-            <p>You have approved to become an organizer</p>
+            <p>You have requested a password reset for your TicketNest account. Please click on the button below.</p>
         </div>
         <br>
         <br>
+        <div style="text-align: center;">
+            <a
+                style="display: inline-block; padding: 20px 45px; background-color: #396961; color: white; 
+                border-radius: 10px; max-width: 400px; font-size: 20px; 
+                text-decoration: none; text-align: center;">You have been promoted to an Organizer</a>
+        </div>
+        <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+            <p>If you did not make this request, you can safely ignore this email.</p>
+            <p>Best Regards, <br><strong style="color: #396961;">TicketNest team</strong></p>
+        </div>
         <hr>
         <div style="text-align: center; margin-top: 20px;">
             <a href="https://www.facebook.com/your-facebook-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
@@ -390,18 +403,18 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
                 <a href="#" style="color: black; text-decoration: none;">Terms of Service</a> •
                 <a href="#" style="color: black; text-decoration: none;">Help Center</a> •
                 <a href="#" style="color: black; text-decoration: none;">Unsubscribe</a>
-            </p>
+                </p>
+            </div>
         </div>
-    </div>
-</div>`
- 
+    </div>`
+    
     const data = {
         email,
         html
     }
-            await response.save()
-    }
-    console.log(response.organizerRequest)
+
+    const rs = await sendMail(data)
+    console.log(rs)
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
