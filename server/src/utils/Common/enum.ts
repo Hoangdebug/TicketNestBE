@@ -32,5 +32,5 @@ export enum EventStatus {
     CANCELLED = "Cancelled",
     PENDING = "Pending",
     SUCCESSED = "Successed",
-    OVER_DATE = 'Overdate',
+    OVER_DATE = 'Overdated',
 }
