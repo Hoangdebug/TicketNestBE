@@ -9,7 +9,7 @@ router.get('/all', ctrls.getAllEvents)
 router.get('/get-event', [verifyAccessToken, isOrganizer], ctrls.getEventByOrganizer);
 router.get('/statistic/event', [verifyAccessToken, isOrganizer], ctrls.staticEventFollowByMonth);
 router.get('/', ctrls.getAllEventsWithPagination)
-router.get('/:id', verifyAccessToken, ctrls.readEvent);
+router.get('/:eid', ctrls.readEvent);
 router.put('/:id', [verifyAccessToken, isOrganizer], ctrls.updateEvent);
 router.put('/update-status/:eid', [verifyAccessToken, isAdmin], ctrls.updateEventsStatus);
 router.put('/upload-image/:id',[verifyAccessToken], uploadCloud.single('images'), ctrls.uploadImage)

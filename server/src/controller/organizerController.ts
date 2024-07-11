@@ -19,13 +19,13 @@ const createOrganizer = asyncHandler(async(req: Request, res: Response) =>{
 //function to get one organizer
 
 const getOrganizer = asyncHandler(async (req: Request, res: Response) => {
-    const { oid } = req.params
-    const getOrganizer = await organizer.findById(oid)
+    const { uid } = req.params;
+    const response = await organizer.findOne({sponsor_by: uid})
     return res.status(200).json({
-        status: getOrganizer ? true : false,
-        code: getOrganizer ? 200 : 400,
-        message: getOrganizer ? "Get organizer successfully" : "Can not get organizer",
-        result: getOrganizer ? getOrganizer : 'Invalid information'
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? "Get organizer successfully" : "Can not get organizer",
+        result: response ? response : 'Invalid information'
     })
 })
 
