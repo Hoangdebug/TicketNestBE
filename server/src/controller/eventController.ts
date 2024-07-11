@@ -42,11 +42,11 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
-    const { uid } = req.params;
-    const event = await EventModel.findById(uid);
-    const user = await User.findById(event?.created_by)
-    const organizer = await Organizer.findById({ sponsor_by: user._id });
-    const eventResult = {event, organizer_by: organizer.name}
+    const { eid } = req.params;
+    console.log(eid)
+    const event = await EventModel.findById(eid).populate('created_by');
+    console.log(event)
+    // const user = await User.findById(event?.created_by)
 
     return res.status(200).json({
         status: event ? true : false,
@@ -234,9 +234,9 @@ const staticEventFollowByMonth = asyncHandler(async (req: Request, res: Response
 
 const uploadImage = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.params
-    if (!req.files) throw new Error('Missing input files')
+    if (!req.file) throw new Error('Missing input files')
     const response = await EventModel.findByIdAndUpdate(_id, { $set: { image: req.file?.path } }, { new: true })
-    console.log(req.files)
+    console.log(req.file)
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
