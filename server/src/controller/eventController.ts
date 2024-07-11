@@ -80,8 +80,9 @@ const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
 
 const updateEventsStatus = asyncHandler(async (req: Request, res: Response) => {
     const { eid } = req.params;
+    const status = req.body
     console.log(eid)
-    const response = await EventModel.findByIdAndUpdate(eid, {status: EventStatus.SUCCESSED}, {new: true}).populate('created_by');
+    const response = await EventModel.findByIdAndUpdate(eid, {status: status}, {new: true}).populate('created_by');
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
@@ -259,6 +260,6 @@ export {
     getEventByOrganizer,
     getAllEventsWithPagination,
     uploadImage,
-    updateEventsStatus,
+    updateEventsStatus, 
     // getTotalOrderByMonth,
 }
