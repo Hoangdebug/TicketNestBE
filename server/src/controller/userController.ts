@@ -326,9 +326,6 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
     const { name, description, contact_email, contact_phone } = req.body;
     if(!name || !description) throw new Error('Missing information!!!')
     const user = await User.findById(_id)
-    console.log(user)
-    console.log(req.body)
-    console.log(_id)
     if(!user) throw new Error('User not found')
     
     // check user request exists

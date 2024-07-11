@@ -58,7 +58,9 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
+    console.log(_id)
     const organizer = await Organizer.findOne({sponsor_by: _id });
+    console.log(organizer)
     const event = await EventModel.find({ created_by: organizer._id }).populate('created_by');
     return res.status(200).json({
         status: event ? true : false,
