@@ -27,7 +27,6 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
     },
     image: {
         type: String,
-        required: true,
     },
     day_start: {
         type: Date,
