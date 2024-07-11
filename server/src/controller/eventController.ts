@@ -10,11 +10,7 @@ const Order = require('../models/order');
 const Event = require('../models/event')
 const User = require('../models/user');
 const Organizer = require('../models/organizer');
-const mongoose = require('mongoose');
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { v2 as cloudinary } from 'cloudinary';
-import dotenv from 'dotenv';
-import multer from 'multer';
+
 
 //Create EventModel
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
@@ -238,7 +234,7 @@ const staticEventFollowByMonth = asyncHandler(async (req: Request, res: Response
 const uploadImage = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.params
     if (!req.files) throw new Error('Missing input files')
-    const response = await EventModel.findByIdAndUpdate(_id, { $push: { image: req.file?.path } }, { new: true })
+    const response = await EventModel.findByIdAndUpdate(_id, { $set: { image: req.file?.path } }, { new: true })
     console.log(req.files)
     return res.status(200).json({
         status: response ? true : false,
@@ -262,7 +258,7 @@ export {
     staticEventFollowByMonth,
     getEventByOrganizer,
     getAllEventsWithPagination,
-    uploadImage
-    updateEventsStatus
+    uploadImage,
+    updateEventsStatus,
     // getTotalOrderByMonth,
 }
