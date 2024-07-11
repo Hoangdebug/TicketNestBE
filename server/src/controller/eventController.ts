@@ -4,6 +4,7 @@ import moment from 'moment';
 import { FilterQuery } from 'mongoose';
 import { getAllWithPagination } from '~/core/pagination';
 import EventModel, { IEvent } from '~/models/event';
+import { EventStatus } from '~/utils/Common/enum';
 const asyncHandler = require("express-async-handler")
 const Order = require('../models/order');
 const Event = require('../models/event')
@@ -75,6 +76,18 @@ const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
         result: response
     })
 })
+
+const updateEventsStatus = asyncHandler(async (req: Request, res: Response) => {
+    const { eid } = req.params;
+    console.log(eid)
+    const response = await EventModel.findByIdAndUpdate(eid, {status: EventStatus.SUCCESSED}, {new: true}).populate('created_by');
+    return res.status(200).json({
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? 'Aproved events successfully' : 'Failed to get all events',
+        result: response
+    })
+});
 
 const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, pageSize = 20, type } = req.query;
@@ -223,6 +236,7 @@ export {
     updateEvent,
     staticEventFollowByMonth,
     getEventByOrganizer,
-    getAllEventsWithPagination
+    getAllEventsWithPagination,
+    updateEventsStatus
     // getTotalOrderByMonth,
 }
