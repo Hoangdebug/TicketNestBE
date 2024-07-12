@@ -132,7 +132,7 @@ const logout = asyncHandler(async(req: Request, res: Response) => {
 //Change password 
 
 const forgotPassword = asyncHandler(async(req: Request, res: Response) => { 
-    const { email } = req.query
+    const { email } = req.params
     if( !email ) throw new Error('Missing email')
     const user = await User.findOne({ email })
     if(!user) throw new Error('User not found!! Invalid email')
@@ -349,7 +349,7 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
 const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { uid } = req.params
     const { permit } = req.body;
-    const response = await User.findById(uid)
+    const response = await User.findById(uid).populate('organizerRef')
     const  email  = response?.email
     if(!response) throw new Error('User not found')
     
@@ -367,7 +367,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
     <div style="padding: 10px; gap: 32px;">
         <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${response.username},</h1>
         <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
-            <p>You have requested a password reset for your TicketNest account. Please click on the button below.</p>
+            <p>You have requested to become an organizer.</p>
         </div>
         <br>
         <br>
@@ -416,6 +416,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
         status: response ? true : false,
         code: response ? 200 : 400,
         message: response ? `User with email ${response.email} has been promoted to organizer.` : 'Can not send user request',
+        test: rs ? `User with email ${rs.email} has been promoted to organizer` : 'Fail',
         result: response ? response : 'Something went wrong!!!!'
     })
 })
