@@ -11,7 +11,8 @@ export interface IEvent extends Document {
     price: number;
     location: string;
     event_type: EventType;
-    status: EventStatus
+    is_active: boolean;
+    status: EventStatus;
     created_by: mongoose.Types.ObjectId;
 }
 
@@ -58,6 +59,10 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
         type: String,
         default: EventStatus.PENDING,
         enum: EventStatus
+    },
+    is_active: {
+        type: Boolean,
+        default: false,
     },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
