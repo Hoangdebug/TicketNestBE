@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { Role, Status, TypeUser } from "~/utils/Common/enum"
 const { generateAccessToken, generateRefreshToken } = require('../config/jwt')
 const User = require('../models/user')
 const Organizer = require('../models/organizer')
@@ -7,31 +8,117 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const sendMail = require('../config/sendMail')
 
-const register = asyncHandler( async (req: Request, res: Response) => {
-    const { email, password, username, dob, phone } = req.body
+const register = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password, username, dob, phone } = req.body;
     console.log(req.body);
-    
-    if(!email || !password || !dob || !username || !phone)
-        return res.status(400).json({
-        status: false,
-        code: 400,
-        message: 'Invalid input',
-        result: "Missing input"
-    })
 
-    const user = await User.findOne({email, phone})
-    if(user)
-        throw new Error('User has existed')     
-    else{
-        const newUser = await User.create(req.body)
+    if (!email || !password || !dob || !username || !phone)
+        return res.status(400).json({
+            status: false,
+            code: 400,
+            message: 'Invalid input',
+            result: "Missing input"
+        });
+
+    const user = await User.findOne({ email, phone });
+    if (user) 
+        throw new Error('User already exists');
+    else {
+        const newUser = new User(req.body);
+        const otp = newUser.createOtp(); // Tạo OTP
+        await newUser.save();
+
+        let type = 'verify_account'
+        // Send mail
+        const html = `
+        <div style="font-family: Arial, sans-serif; padding: 48px;">
+            <img style="width: 100%; height: 100%;" src="" alt="Logo" />
+            <div style="padding: 10px; gap: 32px;">
+                <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${username},</h1>
+                <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                    <p>Thank you for registering with TicketNest. Please use the following OTP to verify your email address:</p>
+                    <h2>${otp}</h2>
+                </div>
+                <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                    <p>If you did not make this request, you can safely ignore this email.</p>
+                    <p>Best Regards, <br><strong style="color: #396961;">TicketNest team</strong></p>
+                </div>
+                <hr>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="https://www.facebook.com/your-facebook-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                        <img src="" alt="Facebook" style="width: 60px; height: 60px;">
+                    </a>
+                    <a href="https://www.instagram.com/your-instagram-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                        <img src="" alt="Instagram" style="width: 60px; height: 60px;">
+                    </a>
+                </div>
+                <hr>
+                <div style="text-align: center;">
+                    <p>&copy; 2024 TicketNest. All rights reserved.</p>
+                    <br>
+                    <p>You are receiving this mail because you registered to join the TicketNest platform as a user or a creator. This also shows that you agree to our Terms of Use and Privacy Policies. If you no longer want to receive mails from us, click the unsubscribe link below to unsubscribe.</p>
+                    <p>
+                        <a href="#" style="color: black; text-decoration: none;">Privacy Policy</a> •
+                        <a href="#" style="color: black; text-decoration: none;">Terms of Service</a> •
+                        <a href="#" style="color: black; text-decoration: none;">Help Center</a> •
+                        <a href="#" style="color: black; text-decoration: none;">Unsubscribe</a>
+                    </p>
+                </div>
+            </div>
+        </div>`;
+
+        const data = { email, html, type };
+        await sendMail(data);
+
         return res.status(200).json({
-            status: newUser ? true : false,
-            code: newUser ? 200 : 400,
-            message: newUser ? "Create successfully" : "Can not create user",
-            result: newUser ? newUser : 'Invalid information'
-        })
+            status: true,
+            code: 200,
+            message: 'User created successfully. OTP sent to email.',
+            result: newUser
+        });
     }
-})
+});
+
+const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp)
+        return res.status(400).json({
+            status: false,
+            code: 400,
+            message: 'Invalid input',
+            result: "Missing input"
+        });
+
+    const user = await User.findOne({ email });
+    if (!user)
+        return res.status(404).json({
+            status: false,
+            code: 404,
+            message: 'User not found',
+            result: "User not found"
+        });
+
+    if (!user.verifyOtp(otp)) {
+        return res.status(400).json({
+            status: false,
+            code: 400,
+            message: 'Invalid or expired OTP',
+            result: "Invalid or expired OTP"
+        });
+    }
+
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    return res.status(200).json({
+        status: true,
+        code: 200,
+        message: 'OTP verified successfully',
+        result: user,
+    });
+});
 
 
 // RefreshToken => cấp mới accessToken
@@ -131,30 +218,24 @@ const logout = asyncHandler(async(req: Request, res: Response) => {
 //Check token có giống với token mà sever gửi mail hay không
 //Change password 
 
-const forgotPassword = asyncHandler(async(req: Request, res: Response) => { 
-    const { email } = req.query
-    if( !email ) throw new Error('Missing email')
-    const user = await User.findOne({ email })
-    if(!user) throw new Error('User not found!! Invalid email')
-    const resetToken = user.createPasswordChangeToken()
-    await user.save()
+const forgotPassword = asyncHandler(async (req: Request, res: Response) => { 
+    const { email } = req.body;
+    if (!email) throw new Error('Missing email');
+    const user = await User.findOne({ email });
+    if (!user) throw new Error('User not found!! Invalid email');
+    const otp = user.createOtp()
+    await user.save();
 
-    //Send mail
+    let type = 'forgot_password'
+    // Send mail
     const html = `
     <div style="font-family: Arial, sans-serif; padding: 48px;">
     <img style="width: 100%; height: 100%;" src="" alt="Logo" />
     <div style="padding: 10px; gap: 32px;">
         <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${user.username},</h1>
         <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
-            <p>You have requested a password reset for your TicketNest account. Please click on the button below.</p>
-        </div>
-        <br>
-        <br>
-        <div style="text-align: center;">
-            <a href="${process.env.URL_SERVER}/api/user/reset-password/${resetToken}" 
-                style="display: inline-block; padding: 20px 45px; background-color: #396961; color: white; 
-                border-radius: 10px; max-width: 400px; font-size: 20px; 
-                text-decoration: none; text-align: center;">Reset Password</a>
+            <p>You have requested a password reset for your TicketNest account. Please use the following OTP to reset your password:</p>
+            <h2>${otp}</h2>
         </div>
         <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
             <p>If you did not make this request, you can safely ignore this email.</p>
@@ -182,32 +263,30 @@ const forgotPassword = asyncHandler(async(req: Request, res: Response) => {
             </p>
         </div>
     </div>
-</div>`
- 
-    const data = {
-        email,
-        html
-    }
+</div>`;
 
-    const rs = await sendMail(data)
+    const data = { email, html, type };
+    const rs = await sendMail(data);
+    
     return res.status(200).json({
         status: true,
         code: 200,
         message: 'Send mail successfully',
         result: rs ? rs : "Failed to send mail"
-    })
-})
+    });
+});
 
-const resetPassword = asyncHandler(async(req: Request, res: Response) => {
-    const { password, token } = req.body
-    const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
-    const user = await User.findOne({passwordResetToken, passwordResetExpire: {$gt: Date.now()}})
-    if(!user) throw new Error('Invalid reset token')
-    user.password = password
-    user.passwordResetToken = undefined
-    user.passwordChangedAt = Date.now()
-    user.passwordResetExpire = undefined
-    await user.save()
+const verifyOtpAndResetPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) throw new Error('Missing required fields')
+    const user = await User.findOne({ email });
+    if (!user) throw new Error('User not found');
+    if (!user.verifyOtp(otp)) throw new Error('Invalid or expired OTP');
+
+    user.password = newPassword;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
     return res.status(200).json({
         status: user ? true : false,
         code: user ? 200 : 400,
@@ -354,69 +433,112 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
     if(!response) throw new Error('User not found')
     
     if(response.organizerRequest == 'Processing'){
-        if( permit == 'Accepted')
-            response.role = "ROLE_ORGANIZER"
-            response.type = "Organizer"
+        if( permit === Status.ACCEPTED)
+            response.role = Role.ROLE_ORGANIZER
+            response.type = TypeUser.ORGANIZER
             response.organizerRequest = permit
             await response.save()
     }
     //Send mail
-    const html = `
-    <div style="font-family: Arial, sans-serif; padding: 48px;">
-    <img style="width: 100%; height: 100%;" src="" alt="Logo" />
-    <div style="padding: 10px; gap: 32px;">
-        <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${response.username},</h1>
-        <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
-            <p>You have requested to become an organizer.</p>
-        </div>
-        <br>
-        <br>
-        <div style="text-align: center;">
-            <a
-                style="display: inline-block; padding: 20px 45px; background-color: #396961; color: white; 
-                border-radius: 10px; max-width: 400px; font-size: 20px; 
-                text-decoration: none; text-align: center;">You have been promoted to an Organizer</a>
-        </div>
-        <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
-            <p>If you did not make this request, you can safely ignore this email.</p>
-            <p>Best Regards, <br><strong style="color: #396961;">TicketNest team</strong></p>
-        </div>
-        <hr>
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="https://www.facebook.com/your-facebook-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
-                <img src="" alt="Facebook" style="width: 60px; height: 60px;">
-            </a>
-            <a href="https://www.instagram.com/your-instagram-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
-                <img src="" alt="Instagram" style="width: 60px; height: 60px;">
-            </a>
-        </div>
-        <hr>
-        <div style="text-align: center;">
-            <p>&copy; 2024 TicketNest. All rights reserved.</p>
-            <br>
-            <p>You are receiving this mail because you registered to join the TicketNest platform as a user or a creator. This also shows that you agree to our Terms of Use and Privacy Policies. If you no longer want to receive mails from us, click the unsubscribe link below to unsubscribe.</p>
-            <p>
-                <a href="#" style="color: black; text-decoration: none;">Privacy Policy</a> •
-                <a href="#" style="color: black; text-decoration: none;">Terms of Service</a> •
-                <a href="#" style="color: black; text-decoration: none;">Help Center</a> •
-                <a href="#" style="color: black; text-decoration: none;">Unsubscribe</a>
-                </p>
-            </div>
-        </div>
-    </div>`
-    
-    const data = {
-        email,
-        html
+    let type
+    let html;
+
+    if (permit === Status.ACCEPTED) {
+        type = 'accepted'
+        html = `
+            <div style="font-family: Arial, sans-serif; padding: 48px;">
+                <img style="width: 100%; height: 100%;" src="" alt="Logo" />
+                <div style="padding: 10px; gap: 32px;">
+                    <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${response.username},</h1>
+                    <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                        <p>You have requested to become an organizer.</p>
+                    </div>
+                    <br>
+                    <br>
+                    <div style="text-align: center;">
+                        <a style="display: inline-block; padding: 20px 45px; background-color: #396961; color: white; 
+                        border-radius: 10px; max-width: 400px; font-size: 20px; 
+                        text-decoration: none; text-align: center;">You have been promoted to an Organizer</a>
+                    </div>
+                    <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                        <p>If you did not make this request, you can safely ignore this email.</p>
+                        <p>Best Regards, <br><strong style="color: #396961;">TicketNest team</strong></p>
+                    </div>
+                    <hr>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="https://www.facebook.com/your-facebook-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                            <img src="" alt="Facebook" style="width: 60px; height: 60px;">
+                        </a>
+                        <a href="https://www.instagram.com/your-instagram-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                            <img src="" alt="Instagram" style="width: 60px; height: 60px;">
+                        </a>
+                    </div>
+                    <hr>
+                    <div style="text-align: center;">
+                        <p>&copy; 2024 TicketNest. All rights reserved.</p>
+                        <br>
+                        <p>You are receiving this mail because you registered to join the TicketNest platform as a user or a creator. This also shows that you agree to our Terms of Use and Privacy Policies. If you no longer want to receive mails from us, click the unsubscribe link below to unsubscribe.</p>
+                        <p>
+                            <a href="#" style="color: black; text-decoration: none;">Privacy Policy</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Terms of Service</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Help Center</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Unsubscribe</a>
+                        </p>
+                    </div>
+                </div>
+            </div>`;
+    } else if (permit === Status.REJECTED) {
+        type ='reject'
+        html = `
+            <div style="font-family: Arial, sans-serif; padding: 48px;">
+                <img style="width: 100%; height: 100%;" src="" alt="Logo" />
+                <div style="padding: 10px; gap: 32px;">
+                    <h1 style="font-size: 45px; margin-bottom: 10px;">Hi ${response.username},</h1>
+                    <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                        <p>We regret to inform you that your request to become an organizer has been denied.</p>
+                    </div>
+                    <br>
+                    <br>
+                    <div style="text-align: center;">
+                        <a style="display: inline-block; padding: 20px 45px; background-color: #FF0000; color: white; 
+                        border-radius: 10px; max-width: 400px; font-size: 20px; 
+                        text-decoration: none; text-align: center;">Request Denied</a>
+                    </div>
+                    <div style="font-size: 20px; line-height: 3; margin-bottom: 1rem;">
+                        <p>If you have any questions, feel free to contact our support team.</p>
+                        <p>Best Regards, <br><strong style="color: #FF0000;">TicketNest team</strong></p>
+                    </div>
+                    <hr>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="https://www.facebook.com/your-facebook-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                            <img src="" alt="Facebook" style="width: 60px; height: 60px;">
+                        </a>
+                        <a href="https://www.instagram.com/your-instagram-page-url" target="_blank" style="text-decoration: none; margin: 0 10px;">
+                            <img src="" alt="Instagram" style="width: 60px; height: 60px;">
+                        </a>
+                    </div>
+                    <hr>
+                    <div style="text-align: center;">
+                        <p>&copy; 2024 TicketNest. All rights reserved.</p>
+                        <br>
+                        <p>You are receiving this mail because you registered to join the TicketNest platform as a user or a creator. This also shows that you agree to our Terms of Use and Privacy Policies. If you no longer want to receive mails from us, click the unsubscribe link below to unsubscribe.</p>
+                        <p>
+                            <a href="#" style="color: black; text-decoration: none;">Privacy Policy</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Terms of Service</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Help Center</a> •
+                            <a href="#" style="color: black; text-decoration: none;">Unsubscribe</a>
+                        </p>
+                    </div>
+                </div>
+            </div>`;
     }
 
-    const rs = await sendMail(data)
-    console.log(rs)
+    const data = { email, html , type};
+    await sendMail(data);
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
         message: response ? `User with email ${response.email} has been promoted to organizer.` : 'Can not send user request',
-        test: rs ? `User with email ${rs.email} has been promoted to organizer` : 'Fail',
         result: response ? response : 'Something went wrong!!!!'
     })
 })
@@ -428,7 +550,7 @@ module.exports = {
     refreshAccessToken,
     logout,
     forgotPassword,
-    resetPassword,
+    verifyOtpAndResetPassword,
     getAllUser,
     deleteUser,
     updateUser,
