@@ -218,6 +218,7 @@ const logout = asyncHandler(async(req: Request, res: Response) => {
 //Check token có giống với token mà sever gửi mail hay không
 //Change password 
 
+
 const forgotPassword = asyncHandler(async (req: Request, res: Response) => { 
     const { email } = req.body;
     if (!email) throw new Error('Missing email');
