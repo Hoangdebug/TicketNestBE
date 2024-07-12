@@ -132,7 +132,7 @@ const logout = asyncHandler(async(req: Request, res: Response) => {
 //Change password 
 
 const forgotPassword = asyncHandler(async(req: Request, res: Response) => { 
-    const { email } = req.query
+    const { email } = req.params
     if( !email ) throw new Error('Missing email')
     const user = await User.findOne({ email })
     if(!user) throw new Error('User not found!! Invalid email')
