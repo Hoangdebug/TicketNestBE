@@ -81,7 +81,7 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 
 const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     const { email, otp } = req.body;
-
+    console.log(req.body);
     if (!email || !otp)
         return res.status(400).json({
             status: false,
@@ -110,6 +110,7 @@ const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
     user.otp = undefined;
     user.otpExpire = undefined;
+    user.is_active = true;
     await user.save();
 
     return res.status(200).json({
@@ -267,18 +268,19 @@ const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
 </div>`;
 
     const data = { email, html, type };
-    const rs = await sendMail(data);
+    await sendMail(data);
     
     return res.status(200).json({
         status: true,
         code: 200,
         message: 'Send mail successfully',
-        result: rs ? rs : "Failed to send mail"
+        result:  'Send mail successfully',
     });
 });
 
 const verifyOtpAndResetPassword = asyncHandler(async (req: Request, res: Response) => {
-    const { email, otp, newPassword } = req.body;
+    const { email} = req.params;
+    const { otp, newPassword } = req.body;
     if (!email || !otp || !newPassword) throw new Error('Missing required fields')
     const user = await User.findOne({ email });
     if (!user) throw new Error('User not found');
@@ -434,7 +436,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
     if(!response) throw new Error('User not found')
     
     if(response.organizerRequest == 'Processing'){
-        if( permit === Status.ACCEPTED)
+        if( permit == Status.ACCEPTED)
             response.role = Role.ROLE_ORGANIZER
             response.type = TypeUser.ORGANIZER
             response.organizerRequest = permit
