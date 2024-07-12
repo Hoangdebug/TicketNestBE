@@ -80,7 +80,8 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
-    const { email, otp } = req.body;
+    const { email} = req.params;
+    const { otp } = req.body;
     console.log(req.body);
     if (!email || !otp)
         return res.status(400).json({
