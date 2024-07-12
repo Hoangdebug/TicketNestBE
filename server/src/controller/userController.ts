@@ -546,6 +546,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
 
 module.exports = {
     register,
+    verifyOtp,
     login,
     getCurrent,
     refreshAccessToken,
