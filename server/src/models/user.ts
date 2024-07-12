@@ -49,11 +49,11 @@ const crypto = require('crypto')
         passwordChangedAt:{
             type:String,
         },
-        passwordResetToken:{
-            type:String,
+        otp: {
+            type: String,
         },
-        passwordResetExpire:{
-            type:String,
+        otpExpire: {
+            type: Date,
         },
         type:{
             type:String,
@@ -94,6 +94,17 @@ userSchema.methods = {
         this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
         this.passwordResetExpire = Date.now() + 15 * 60 * 1000
         return resetToken 
+    },
+     // Create OTP for email verification or password reset
+     createOtp: function () {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+        this.otp = crypto.createHash('sha256').update(otp).digest('hex');
+        this.otpExpire = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+        return otp;
+    },
+    verifyOtp: function (inputOtp: string) {
+        const hashedOtp = crypto.createHash('sha256').update(inputOtp).digest('hex');
+        return this.otp === hashedOtp && this.otpExpire > Date.now();
     }
 } 
 
