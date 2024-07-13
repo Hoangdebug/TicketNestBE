@@ -55,6 +55,10 @@ const crypto = require('crypto')
         otpExpire: {
             type: Date,
         },
+        isActive:{
+            type: Boolean,
+            default: false,
+        },
         type:{
             type:String,
             enum: TypeUser,
