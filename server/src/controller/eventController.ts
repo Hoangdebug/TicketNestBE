@@ -43,9 +43,7 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
     const { eid } = req.params;
-    console.log(eid)
     const event = await EventModel.findById(eid).populate('created_by');
-    console.log(event)
     // const user = await User.findById(event?.created_by)
 
     return res.status(200).json({
@@ -58,9 +56,7 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
-    console.log(_id)
     const organizer = await Organizer.findOne({sponsor_by: _id });
-    console.log(organizer)
     const event = await EventModel.find({ created_by: organizer._id }).populate('created_by');
     return res.status(200).json({
         status: event ? true : false,
@@ -83,7 +79,6 @@ const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
 const updateEventsStatus = asyncHandler(async (req: Request, res: Response) => {
     const { eid } = req.params;
     const {status} = req.body
-    console.log(eid)
     const response = await EventModel.findByIdAndUpdate(eid, {status: status}, {new: true}).populate('created_by');
     return res.status(200).json({
         status: response ? true : false,
@@ -235,21 +230,41 @@ const staticEventFollowByMonth = asyncHandler(async (req: Request, res: Response
 // })
 
 const uploadImage = asyncHandler(async (req: Request, res: Response) => {
-    const { _id } = req.params
-    if (!req.file) throw new Error('Missing input files')
-    const response = await EventModel.findByIdAndUpdate(_id, { $set: { image: req.file?.path } }, { new: true })
+    const { eventId  } = req.params;
+    console.log(eventId ); // Log the eid to verify it's being received
     console.log(req.file)
+    if (!req.file) throw new Error('Missing input files');
+    const response = await EventModel.findByIdAndUpdate(eventId , { $set: { images: req.file?.path } }, { new: true });
+    console.log(response); // Log the response to verify the update
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
         message: response ? 'Image uploaded successfully' : 'Can not upload image',
         result: response ? response : 'Can not upload file!!!!'
-    })
-})
+    });
+});
 
 
 
+export const checkAndUpdateEventStatus = async () => {
+    const currentDate = new Date();
+    
+    // Tìm tất cả các sự kiện có `day_end` vượt qua ngày hiện tại và không có trạng thái là `CANCELLED`
+    const eventsToUpdate = await EventModel.find({
+        day_end: { $lt: currentDate },
+        status: { $ne: EventStatus.CANCELLED }
+    });
 
+    if (eventsToUpdate.length > 0) {
+        for (const event of eventsToUpdate) {
+            event.status = EventStatus.CANCELLED;
+            await event.save();
+        }
+        console.log(`${eventsToUpdate.length} event(s) updated to status CANCELLED.`);
+    } else {
+        console.log('No events to update.');
+    }
+};
 
 
 

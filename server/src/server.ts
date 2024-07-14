@@ -2,6 +2,8 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import {dbConnect} from './config/dbConnect'
+import { checkAndUpdateEventStatus } from './controller/eventController';
+import cron from 'node-cron';
 require('dotenv').config()
 const initRoutes = require("./routes/index")
 const cookieParser = require("cookie-parser")
@@ -27,3 +29,8 @@ app.listen(port, () => {
   console.log('Server is running on port', port);
 });
 
+
+cron.schedule('0 0 * * *', () => {
+  console.log('Running a daily job at midnight');
+  checkAndUpdateEventStatus();
+});

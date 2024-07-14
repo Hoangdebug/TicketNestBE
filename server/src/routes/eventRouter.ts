@@ -12,7 +12,7 @@ router.get('/', ctrls.getAllEventsWithPagination)
 router.get('/:eid', ctrls.readEvent);
 router.put('/:id', [verifyAccessToken, isOrganizer], ctrls.updateEvent);
 router.put('/update-status/:eid', [verifyAccessToken, isAdmin], ctrls.updateEventsStatus);
-router.put('/upload-image/:id',[verifyAccessToken], uploadCloud.single('images'), ctrls.uploadImage)
+router.put('/upload-image/:eventId',[verifyAccessToken], uploadCloud.single('images'), ctrls.uploadImage);
 
 
 

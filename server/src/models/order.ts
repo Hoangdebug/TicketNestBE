@@ -1,27 +1,28 @@
+import { OrderStatus } from "~/utils/Common/enum";
+
 const mongoose = require('mongoose'); // Erase if already required
 
 // Declare the Schema of the Mongo model
 var orderSchema = new mongoose.Schema({    
-    status:{
-        type:String,        
-        default:'Pending',
-        enum:['Cancelled', 'Pending', 'Successed']
-    },
-    seatcode:{      
-        seatcode: {type:mongoose.Types.ObjectId, ref:'Seat'},        
-    },
-    totalmoney:{
-        type:Number,
+    seat_code:[{      
+        type:String, 
+    }],
+    total_money:{
+        type:String,
         required:true,
     },
-    settime:{        
-        type:Date,
-        required:true,
+    customer:{
+        type: mongoose.Types.ObjectId, ref:'User'
     },
-    // payment:{
+    event:{
+        type: mongoose.Types.ObjectId, ref:'Event'
+    },
+    payment:{
+        type:String,
+        default: OrderStatus.SUCCESSED
+    }
 
-    // }
-});
+}, {timeStamp: true});
 
 //Export the model
 module.exports = mongoose.model('Order', orderSchema);
