@@ -4,7 +4,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose'; // Erase if alread
 export interface IEvent extends Document {
     name: string;
     description: string;
-    image: string;
+    images: string;
     day_start: Date;
     day_end: Date;
     ticket_number?: EventTicket;
@@ -26,7 +26,7 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
         type: String,
         required: true,
     },
-    image: {
+    images: {
         type: String,
     },
     day_start: {
