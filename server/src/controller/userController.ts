@@ -80,8 +80,8 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
-    const { email, otp } = req.body;
-    console.log(req.body);
+    const { email} = req.params;
+    const { otp } = req.body;
     if (!email || !otp)
         return res.status(400).json({
             status: false,
@@ -110,7 +110,7 @@ const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
     user.otp = undefined;
     user.otpExpire = undefined;
-    user.is_active = true;
+    user.isActive = true;
     await user.save();
 
     return res.status(200).json({
@@ -140,6 +140,15 @@ const login = asyncHandler( async (req: Request, res: Response) => {
             status: false,
             code: 401,
             message: 'Account is blocked',
+            result: 'Invalid information'
+        })
+    }
+
+    if(response.isActive==false){
+        return res.status(401).json({
+            status: false,
+            code: 401,
+            message: 'Account is not Active',
             result: 'Invalid information'
         })
     }
@@ -224,6 +233,7 @@ const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     const { email } = req.body;
     if (!email) throw new Error('Missing email');
     const user = await User.findOne({ email });
+    console.log({email})
     if (!user) throw new Error('User not found!! Invalid email');
     const otp = user.createOtp()
     await user.save();
@@ -281,6 +291,7 @@ const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
 const verifyOtpAndResetPassword = asyncHandler(async (req: Request, res: Response) => {
     const { email} = req.params;
     const { otp, newPassword } = req.body;
+    console.log({otp, newPassword});
     if (!email || !otp || !newPassword) throw new Error('Missing required fields')
     const user = await User.findOne({ email });
     if (!user) throw new Error('User not found');
