@@ -441,23 +441,24 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
 
 const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) => {
     const { uid } = req.params
-    const { permit } = req.body;
+    const { organizerRequest } = req.body;
     const response = await User.findById(uid).populate('organizerRef')
     const  email  = response?.email
     if(!response) throw new Error('User not found')
     
-    if(response.organizerRequest == 'Processing'){
-        if( permit == Status.ACCEPTED)
-            response.role = Role.ROLE_ORGANIZER
-            response.type = TypeUser.ORGANIZER
-            response.organizerRequest = permit
-            await response.save()
-    }
+        if(response.organizerRequest == 'Processing'){
+            if( organizerRequest == Status.ACCEPTED) {
+                response.role = Role.ROLE_ORGANIZER
+                response.type = TypeUser.ORGANIZER
+                response.organizerRequest = organizerRequest
+                await response.save()
+            } 
+        }
     //Send mail
     let type
     let html;
 
-    if (permit === Status.ACCEPTED) {
+    if (organizerRequest === Status.ACCEPTED) {
         type = 'accepted'
         html = `
             <div style="font-family: Arial, sans-serif; padding: 48px;">
@@ -501,7 +502,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
                     </div>
                 </div>
             </div>`;
-    } else if (permit === Status.REJECTED) {
+    } else if (organizerRequest === Status.REJECTED) {
         type ='reject'
         html = `
             <div style="font-family: Arial, sans-serif; padding: 48px;">
