@@ -16,11 +16,11 @@ export enum Status {
     REJECTED = 'Rejected',
 }
 
-export enum EventTicket {
-    BASE = '50',
-    MEDIUM = '60',
-    LARGE = '70',
-}
+// export enum EventTicket {
+//     BASE = 50,
+//     MEDIUM = 60,
+//     LARGE = 70,
+// }
 
 export enum EventType {
     MUSIC = 'Music',

@@ -440,26 +440,30 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
 })
 
 const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) => {
-    const { uid } = req.params
+    const { uid } = req.params;
     const { organizerRequest } = req.body;
-    const response = await User.findById(uid).populate('organizerRef')
-    const  email  = response?.email
-    if(!response) throw new Error('User not found')
-    
-        if(response.organizerRequest == 'Processing'){
-            if( organizerRequest == Status.ACCEPTED) {
-                response.role = Role.ROLE_ORGANIZER
-                response.type = TypeUser.ORGANIZER
-                response.organizerRequest = organizerRequest
-                await response.save()
-            } 
+    const response = await User.findById(uid).populate('organizerRef');
+    if (!response) throw new Error('User not found');
+    const email = response.email;
+    console.log(email);
+    if (response.organizerRequest === 'Processing') {
+        if (organizerRequest === Status.ACCEPTED) {
+            response.role = Role.ROLE_ORGANIZER;
+            response.type = TypeUser.ORGANIZER;
+            response.organizerRequest = Status.ACCEPTED;
+            await response.save();
+        } else if (organizerRequest === Status.REJECTED) {
+            response.organizerRequest = Status.REJECTED;
+            await response.save();
         }
-    //Send mail
-    let type
+    }
+
+    // Gửi mail
+    let type;
     let html;
 
     if (organizerRequest === Status.ACCEPTED) {
-        type = 'accepted'
+        type = 'accepted';
         html = `
             <div style="font-family: Arial, sans-serif; padding: 48px;">
                 <img style="width: 100%; height: 100%;" src="" alt="Logo" />
@@ -503,7 +507,7 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
                 </div>
             </div>`;
     } else if (organizerRequest === Status.REJECTED) {
-        type ='reject'
+        type = 'rejected';
         html = `
             <div style="font-family: Arial, sans-serif; padding: 48px;">
                 <img style="width: 100%; height: 100%;" src="" alt="Logo" />
@@ -548,15 +552,25 @@ const organizerPermitByAdmin = asyncHandler(async(req: Request, res: Response) =
             </div>`;
     }
 
-    const data = { email, html , type};
-    await sendMail(data);
-    return res.status(200).json({
-        status: response ? true : false,
-        code: response ? 200 : 400,
-        message: response ? `User with email ${response.email} has been promoted to organizer.` : 'Can not send user request',
-        result: response ? response : 'Something went wrong!!!!'
-    })
-})
+    try {
+        const data = { email, html, type };
+        await sendMail(data);
+        console.log(data)
+        res.status(200).json({
+            status: true,
+            code: 200,
+            message: `User with email ${response.email} has been promoted to organizer.`,
+            result: response
+        });
+    } catch (error) {
+        res.status(400).json({
+            status: false,
+            code: 400,
+            message: 'Cannot send user request',
+            result: 'Something went wrong!!!!'
+        });
+    }
+});
 
 module.exports = {
     register,
