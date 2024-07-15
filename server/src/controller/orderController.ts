@@ -1,31 +1,19 @@
+import checkoutNodeJssdk from '@paypal/checkout-server-sdk';
 import { Request, Response } from 'express'
-import moment from 'moment';
-import crypto from 'crypto';
-import qs from 'qs';
 const asyncHandler = require ("express-async-handler")
 const Order = require ('../models/order')
-const Event = require ('../models/event')
-interface VNPayParams {
-    vnp_Amount: number;
-    vnp_Command: string;
-    vnp_CreateDate: string;
-    vnp_CurrCode: string;
-    vnp_IpAddr: string;
-    vnp_Locale: string;
-    vnp_OrderInfo: string;
-    vnp_OrderType: string;
-    vnp_ReturnUrl: string;
-    vnp_TmnCode: string;
-    vnp_TxnRef: any;
-    vnp_Version: string;
-    vnp_SecureHash?: string; // Optional property
+import EventModel, { IEvent } from '~/models/event';
+import paypalClient from '~/config/paypalClient';
+
+interface PayPalLink {
+    href: string;
+    rel: string;
+    method: string;
 }
 
 const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
-    console.log(_id);
     const { eid } = req.params;
-    console.log(eid);
     const { seatcode, totalmoney, paymentCode } = req.body;
 
     if (!seatcode || !totalmoney) {
@@ -37,7 +25,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     }
 
     try {
-        const event = await Event.findById(eid);
+        const event = await EventModel.findById(eid);
         if (!event) {
             return res.status(404).json({
                 status: false,
@@ -47,8 +35,10 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
             });
         }
 
+        const ticketNumber = event.ticket_number ?? 0;
+
         const seatCount = seatcode.length;
-        if (event.ticket_number < seatCount) {
+        if (ticketNumber < seatCount) {
             return res.status(400).json({
                 status: false,
                 code: 400,
@@ -75,17 +65,45 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
             });
         }
 
-        event.ticket_number -= seatCount;
+        event.ticket_number = ticketNumber - seatCount;
         await event.save();
 
-        const paymentUrl = createVNPayPaymentUrl({ amount: totalmoney, paymentCode, orderId: order._id });
+        if (paymentCode === 'paypal') {
+            const request = new checkoutNodeJssdk.orders.OrdersCreateRequest();
+            request.prefer("return=representation");
+            request.requestBody({
+                intent: 'CAPTURE',
+                purchase_units: [{
+                    reference_id: order._id.toString(),
+                    amount: {
+                        currency_code: 'USD',
+                        value: totalmoney.toString(),
+                    },
+                    description: `Payment for order: ${order._id}`
+                }],
+                application_context: {
+                    return_url: 'http://localhost:4000/payment-return',
+                    cancel_url: 'http://localhost:4000/payment-cancel'
+                }
+            });
+
+            const createOrderResponse = await paypalClient.client().execute(request);
+            const paymentUrl = createOrderResponse.result.links.find((link: { href: string; rel: string; method: string; }) => link.rel === 'approve')?.href;
+
+            return res.status(200).json({
+                status: true,
+                code: 200,
+                message: 'Order created successfully',
+                result: order,
+                paymentUrl: paymentUrl
+            });
+        }
 
         return res.status(200).json({
             status: true,
             code: 200,
             message: 'Order created successfully',
-            result: order,
-            paymentUrl: paymentUrl
+            result: order
         });
     } catch (error) {
         console.error('Error creating order:', error);
@@ -98,42 +116,56 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
-interface VNPayPaymentParams {
-    amount: number;
-    paymentCode: string;
-    orderId: any;
-}
+const captureOrder = asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.query;
 
-function createVNPayPaymentUrl({ amount, paymentCode, orderId }: VNPayPaymentParams): string {
-    const tmnCode = 'CGXZLSOZ"';
-    const secretKey = 'XNBOJFAKAZQSGTARRLGCHVZWCIOIGSHN';
-    const returnUrl = 'http://localhost:5000/payment-return';
-    const createDate = moment().format('YYYYMMDDHHmmss');
-    const ipAddr = '127.0.0.1'; // Get this dynamically if needed
+    const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(token as string);
+    request.requestBody({});
 
-    const vnp_Params: VNPayParams = {
-        vnp_Amount: amount * 100, // Amount in VND * 100
-        vnp_Command: 'pay',
-        vnp_CreateDate: createDate,
-        vnp_CurrCode: 'VND',
-        vnp_IpAddr: ipAddr,
-        vnp_Locale: 'vn',
-        vnp_OrderInfo: `Payment for order: ${orderId}`,
-        vnp_OrderType: 'other',
-        vnp_ReturnUrl: returnUrl,
-        vnp_TmnCode: tmnCode,
-        vnp_TxnRef: orderId,
-        vnp_Version: '2.1.0'
-    };
+    try {
+        const captureOrderResponse = await paypalClient.client().execute(request);
 
-    const signData = qs.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac('sha512', secretKey);
-    const secureHash = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-    vnp_Params.vnp_SecureHash = secureHash;
+        if (captureOrderResponse.result.status === 'COMPLETED') {
+            const orderId = captureOrderResponse.result.purchase_units[0].reference_id;
+            const order = await Order.findById(orderId);
+            if (order) {
+                order.status = 'paid';
+                await order.save();
+            }
 
-    const paymentUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?${qs.stringify(vnp_Params, { encode: false })}`;
-    return paymentUrl;
-}
+            return res.status(200).json({
+                status: true,
+                code: 200,
+                message: 'Payment successful',
+                result: captureOrderResponse.result
+            });
+        } else {
+            return res.status(400).json({
+                status: false,
+                code: 400,
+                message: 'Payment not completed',
+                result: captureOrderResponse.result
+            });
+        }
+    } catch (error: any) {
+        if (error.statusCode === 422 && error._originalError?.text.includes("ORDER_ALREADY_CAPTURED")) {
+            return res.status(400).json({
+                status: false,
+                code: 400,
+                message: 'Order already captured',
+                result: null
+            });
+        }
+
+        console.error('Error capturing order:', error);
+        return res.status(500).json({
+            status: false,
+            code: 500,
+            message: 'Payment failed',
+            result: null
+        });
+    }
+});
 // Read Order
 const getOrder = asyncHandler(async (req: Request, res: Response) => {
     const order = await Order.findById(req.params.id).populate('seatcode')
@@ -187,5 +219,6 @@ module.exports = {
     createOrder, 
     getOrder, 
     updateOrder, 
-    deleteOrder
+    deleteOrder,
+    captureOrder
 }
