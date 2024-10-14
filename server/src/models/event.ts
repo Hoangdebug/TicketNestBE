@@ -1,4 +1,4 @@
-import { EventStatus, EventTicket, EventType } from "~/utils/Common/enum";
+import { EventStatus, EventType } from "~/utils/Common/enum";
 import mongoose, { Document, Model, Schema } from 'mongoose'; // Erase if already required
 
 export interface IEvent extends Document {
@@ -7,7 +7,7 @@ export interface IEvent extends Document {
     images: string;
     day_start: Date;
     day_end: Date;
-    ticket_number?: EventTicket;
+    ticket_number?: number | undefined;
     price: number;
     location: string;
     event_type: EventType;
@@ -38,9 +38,8 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
         required: true,
     },
     ticket_number: {
-        type: String,
-        enum: EventTicket,
-        default: null,
+        type: Number,
+        default: 0,
     },
     price: {
         type: Number,
