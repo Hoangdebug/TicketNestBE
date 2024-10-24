@@ -100,6 +100,9 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
         }
     }
 
+    const totalEvents = await EventModel.countDocuments(findCondition);
+    const totalPage = Math.ceil(totalEvents / Number(pageSize));
+    
     const response = await getAllWithPagination<IEvent>(EventModel,
         {
             page: page as number,
@@ -112,9 +115,11 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
         status: response ? true : false,
         code: response ? 200 : 400,
         message: response ? 'Get all events successfully' : 'Failed to get all events',
-        result: response
+        result: response,
+        totalPage,
     })
-})
+});
+
 
 //Update EventModel
 const updateEvent = asyncHandler(async (req: Request, res: Response) => {
