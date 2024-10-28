@@ -16,7 +16,7 @@ const Organizer = require('../models/organizer');
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
     const user = await User.findById(_id)
-    const { name, description, image, day_start, day_end, ticket_number, price, location, status, event_type } = req.body;
+    const { name, description, image, day_start, day_end, ticket_number, price, location, quantity, status, event_type } = req.body;
     const event = new EventModel({
         name,
         description,
@@ -26,6 +26,7 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         ticket_number,
         price,
         location,
+        quantity,
         status,
         event_type,
         created_by: user.organizerRef
@@ -53,6 +54,17 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
         result: event
     });
 })
+
+const getLocation = asyncHandler(async (req: Request, res: Response) => {
+    const validLocations = ['Location A', 'Location B', 'Location C', 'ANOTHER'];
+
+    return res.status(200).json({
+        status: true,
+        code: 200,
+        message: 'Get valid locations successfully',
+        result: validLocations
+    });
+});
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
@@ -278,5 +290,6 @@ export {
     getAllEventsWithPagination,
     uploadImage,
     updateEventsStatus, 
+    getLocation,
     // getTotalOrderByMonth,
 }

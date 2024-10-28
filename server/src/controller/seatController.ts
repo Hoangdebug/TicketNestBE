@@ -21,6 +21,7 @@ const createSeat = asyncHandler(async (req: Request, res: Response) => {
 const getSeat = asyncHandler(async (req: Request, res: Response) => {
     const { sid } = req.params
     const getseat = await seat.findById(sid)
+        .populate('location quantity price');
     return res.status(200).json({
         status: getseat ? true : false,
         code: getseat ? 200 : 400,
@@ -35,6 +36,7 @@ const getSeat = asyncHandler(async (req: Request, res: Response) => {
 const updateSeat = asyncHandler(async (req: Request, res: Response) => {
     const { sid } = req.params
     const updatedSeat = await seat.findByIdAndUpdate(sid, req.body, { new: true })
+        .populate('location quantity price');
     return res.status(200).json({
         status: updatedSeat ? true : false,
         code: updatedSeat ? 200 : 400,
