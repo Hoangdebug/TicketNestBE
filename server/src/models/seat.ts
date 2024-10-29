@@ -2,22 +2,27 @@ const mongoose = require('mongoose'); // Erase if already required
 
 // Declare the Schema of the Mongo model
 var seatSchema = new mongoose.Schema({
-    type:{
-        type:String,
-        enum:['Normal, Vip1, Vip2, Vip Plus']
-    },
     username:{
-        user: {type:mongoose.Types.ObjectId, ref:'User'},       
+        user: {type:mongoose.Types.ObjectId, ref:'User'},
     },
-    seatcode:{        
+    seatcode:{
         type:String,
         required:true,
     },
     status:{
-        type:String,        
+        type:String,
         default: 'False',
         enum:['True','False']
     },
+    location: {
+        location: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+    },
+    quantity: {
+        quantity: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+    },
+    price: {
+        price: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+    }
 });
 
 //Export the model
