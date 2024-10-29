@@ -8,13 +8,9 @@ const slugify = require('slugify')
 import { Request, Response } from "express"
 import { SeatStatus } from '~/utils/Common/enum';
 
-
-// function to creat Seat
-
 const createSeat = asyncHandler(async (req: Request, res: Response) => {
     const { eventId } = req.body;
 
-    // Kiểm tra xem eventId có tồn tại không
     if (!eventId) {
         return res.status(400).json({ success: false, mes: "Event ID is missing" });
     }
@@ -24,13 +20,12 @@ const createSeat = asyncHandler(async (req: Request, res: Response) => {
         return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Tạo ghế duy nhất với mảng price và quantity từ event
     const seat = new SeatModel({
-        username: '615f1f1f1f1f1f1f1f1f1f1f',   // user giả định nếu cần
-        status: SeatStatus.PENDING,  // Sử dụng giá trị từ enum SeatStatus
+        username: '615f1f1f1f1f1f1f1f1f1f1f',   
+        status: SeatStatus.PENDING,  
         location: event._id,
-        quantity: event.quantity,  // Gán mảng quantity từ event
-        price: event.price,        // Gán mảng price từ event
+        quantity: event.quantity,
+        price: event.price,
     });
 
     await seat.save();
@@ -46,8 +41,8 @@ const createSeat = asyncHandler(async (req: Request, res: Response) => {
 
 
 const updateSeatStatus = asyncHandler(async (req: Request, res: Response) => {
-    const { seatId } = req.params; // Lấy seatId từ params
-    const { status } = req.body;   // Lấy trạng thái mới từ request body
+    const { seatId } = req.params;
+    const { status } = req.body;
 
     // Cập nhật trạng thái của ghế
     const updatedSeat = await SeatModel.findByIdAndUpdate(seatId, { status }, { new: true });

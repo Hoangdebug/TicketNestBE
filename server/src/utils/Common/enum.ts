@@ -43,7 +43,7 @@ export enum OrderStatus {
 
 export enum SeatStatus {
     CANCELLED = "Cancelled",
-    PENDING = "Pending",  // Đảm bảo giá trị ở đây là "Pending" với chữ cái đầu viết hoa
+    PENDING = "Pending", 
     SUCCESSED = "Successed",
     OVER_DATE = 'Overdated',
 }

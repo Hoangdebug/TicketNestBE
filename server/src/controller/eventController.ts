@@ -35,13 +35,12 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
     await event.save();
     console.log(event)
 
-    // Tạo một document Seat duy nhất với mảng price và quantity từ Event
     const seat = new SeatModel({
-        username: _id,  // Lấy từ user
-        status: EventStatus.PENDING, // Đặt trạng thái chờ cho ghế
-        location: event._id,  // Lưu ID của event vào ghế
-        quantity: event.quantity,  // Gán toàn bộ mảng quantity từ event
-        price: event.price,  // Gán toàn bộ mảng price từ event
+        username: _id, 
+        status: EventStatus.PENDING, 
+        location: event._id, 
+        quantity: event.quantity,
+        price: event.price,
     });
 
     await seat.save();  // Lưu một document seat duy nhất

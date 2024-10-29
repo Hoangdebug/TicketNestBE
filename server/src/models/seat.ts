@@ -5,8 +5,8 @@ export interface ISeat extends Document {
     username: mongoose.Types.ObjectId;
     status: SeatStatus;
     location: mongoose.Types.ObjectId;
-    quantity: number[];  // Chuyển thành mảng number
-    price: number[];     // Chuyển thành mảng number
+    quantity: number[]; 
+    price: number[];
 }
 
 // Declare the Schema of the Mongo model
@@ -23,11 +23,11 @@ var seatSchema: Schema<ISeat> = new mongoose.Schema({
         location: { type: mongoose.Types.ObjectId, ref: 'EventModel' }
     },
     quantity: {
-        type: [Number],  // Chuyển thành mảng number
+        type: [Number],  
         required: true,
     },
     price: {
-        type: [Number],  // Chuyển thành mảng number
+        type: [Number], 
         required: true,
     }
 });
