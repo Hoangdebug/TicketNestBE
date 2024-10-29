@@ -1,29 +1,36 @@
-const mongoose = require('mongoose'); // Erase if already required
+import { SeatStatus } from "~/utils/Common/enum";
+import mongoose, { Document, Model, Schema } from 'mongoose';
 
+export interface ISeat extends Document {
+    username: mongoose.Types.ObjectId;
+    status: SeatStatus;
+    location: mongoose.Types.ObjectId;
+    quantity: number;
+    price: number;
+}
 // Declare the Schema of the Mongo model
-var seatSchema = new mongoose.Schema({
+var seatSchema: Schema<ISeat> = new mongoose.Schema({
     username:{
         user: {type:mongoose.Types.ObjectId, ref:'User'},
     },
-    seatcode:{
-        type:String,
-        required:true,
-    },
-    status:{
-        type:String,
-        default: 'False',
-        enum:['True','False']
+    status: {
+        type: String,
+        default: SeatStatus.PENDING,
+        enum: SeatStatus
     },
     location: {
         location: {type: mongoose.Types.ObjectId, ref:'EventModel'}
     },
     quantity: {
-        quantity: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+        type: Number,
+        required: true,
     },
     price: {
-        price: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+        type: Number,
+        required: true,
     }
 });
 
 //Export the model
-module.exports = mongoose.model('Seat', seatSchema);
+const SeatModel: Model<ISeat> = mongoose.model("Seat", seatSchema)
+export default SeatModel
