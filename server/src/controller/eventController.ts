@@ -34,25 +34,25 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
     });
     await event.save();
     console.log(event)
-    const seats = [];
-    for (let i = 0; i < event.quantity.length; i++) {
-        const seat = new SeatModel({
-            username: _id,  // Lấy từ user
-            status: EventStatus.PENDING, // Đặt trạng thái chờ cho ghế
-            location: event._id,  // Lưu ID của event vào ghế
-            quantity: event.quantity[i],  // Gán quantity từ event
-            price: event.price[i],  // Gán price từ event
-        });
-        await seat.save();
-        seats.push(seat);  // Lưu lại các seat đã tạo để tham chiếu nếu cần
-    }
+
+    // Tạo một document Seat duy nhất với mảng price và quantity từ Event
+    const seat = new SeatModel({
+        username: _id,  // Lấy từ user
+        status: EventStatus.PENDING, // Đặt trạng thái chờ cho ghế
+        location: event._id,  // Lưu ID của event vào ghế
+        quantity: event.quantity,  // Gán toàn bộ mảng quantity từ event
+        price: event.price,  // Gán toàn bộ mảng price từ event
+    });
+
+    await seat.save();  // Lưu một document seat duy nhất
+
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
         message: event ? 'Event created successfully' : 'Failed to create event',
         result: event
     });
-})
+});
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {

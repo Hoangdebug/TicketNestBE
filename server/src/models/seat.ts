@@ -5,13 +5,14 @@ export interface ISeat extends Document {
     username: mongoose.Types.ObjectId;
     status: SeatStatus;
     location: mongoose.Types.ObjectId;
-    quantity: number;
-    price: number;
+    quantity: number[];  // Chuyển thành mảng number
+    price: number[];     // Chuyển thành mảng number
 }
+
 // Declare the Schema of the Mongo model
 var seatSchema: Schema<ISeat> = new mongoose.Schema({
-    username:{
-        user: {type:mongoose.Types.ObjectId, ref:'User'},
+    username: {
+        user: { type: mongoose.Types.ObjectId, ref: 'User' },
     },
     status: {
         type: String,
@@ -19,18 +20,18 @@ var seatSchema: Schema<ISeat> = new mongoose.Schema({
         enum: SeatStatus
     },
     location: {
-        location: {type: mongoose.Types.ObjectId, ref:'EventModel'}
+        location: { type: mongoose.Types.ObjectId, ref: 'EventModel' }
     },
     quantity: {
-        type: Number,
+        type: [Number],  // Chuyển thành mảng number
         required: true,
     },
     price: {
-        type: Number,
+        type: [Number],  // Chuyển thành mảng number
         required: true,
     }
 });
 
 //Export the model
-const SeatModel: Model<ISeat> = mongoose.model("Seat", seatSchema)
-export default SeatModel
+const SeatModel: Model<ISeat> = mongoose.model("Seat", seatSchema);
+export default SeatModel;
