@@ -12,7 +12,8 @@ export interface ISeat extends Document {
 // Declare the Schema of the Mongo model
 var seatSchema: Schema<ISeat> = new mongoose.Schema({
     username: {
-        user: { type: mongoose.Types.ObjectId, ref: 'User' },
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User'
     },
     status: {
         type: String,
@@ -20,7 +21,8 @@ var seatSchema: Schema<ISeat> = new mongoose.Schema({
         enum: SeatStatus
     },
     location: {
-        location: { type: mongoose.Types.ObjectId, ref: 'EventModel' }
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'EventModel'
     },
     quantity: {
         type: [Number],  
