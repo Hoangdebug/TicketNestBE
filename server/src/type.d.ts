@@ -16,7 +16,7 @@ declare global {
     interface Request {
       file?: MulterFile;
       user?: User;
-      event?: Event;
+      event?: EventModel;
       ticket?: Ticket;
       order?: Order;
       seat?: Seat;

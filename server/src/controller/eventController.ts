@@ -4,6 +4,7 @@ import moment from 'moment';
 import { FilterQuery } from 'mongoose';
 import { getAllWithPagination } from '~/core/pagination';
 import EventModel, { IEvent } from '~/models/event';
+import SeatModel, { ISeat } from '~/models/seat';
 import { EventStatus } from '~/utils/Common/enum';
 const asyncHandler = require("express-async-handler")
 const Order = require('../models/order');
@@ -33,13 +34,24 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
     });
     await event.save();
     console.log(event)
+
+    const seat = new SeatModel({
+        username: _id, 
+        status: EventStatus.PENDING, 
+        location: event._id, 
+        quantity: event.quantity,
+        price: event.price,
+    });
+
+    await seat.save();  // Lưu một document seat duy nhất
+
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
         message: event ? 'Event created successfully' : 'Failed to create event',
         result: event
     });
-})
+});
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {

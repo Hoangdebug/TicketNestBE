@@ -40,3 +40,10 @@ export enum OrderStatus {
     PENDING = "Pending",
     SUCCESSED = "Successed",
 }
+
+export enum SeatStatus {
+    CANCELLED = "Cancelled",
+    PENDING = "Pending", 
+    SUCCESSED = "Successed",
+    OVER_DATE = 'Overdated',
+}
