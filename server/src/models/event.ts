@@ -10,6 +10,7 @@ export interface IEvent extends Document {
     ticket_number?: number | undefined;
     price: number[];
     location: string;
+    ticket_type: String[];
     quantity: number[];
     event_type: EventType;
     is_active: boolean;
@@ -50,6 +51,10 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
         type: String,
         required: true,
         enum: ['Location A', 'Location B', 'Location C', 'ANOTHER'],
+    },
+    ticket_type: {
+        type: [String],
+        required: true,
     },
     quantity: {
         type: [Number],

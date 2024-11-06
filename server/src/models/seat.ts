@@ -3,7 +3,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface ISeat extends Document {
     username: mongoose.Types.ObjectId;
-    status: SeatStatus;
+    ticket_type: String[];
     location: mongoose.Types.ObjectId;
     quantity: number[]; 
     price: number[];
@@ -14,15 +14,14 @@ var seatSchema: Schema<ISeat> = new mongoose.Schema({
     username: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
-    },
-    status: {
-        type: String,
-        default: SeatStatus.PENDING,
-        enum: SeatStatus
-    },
+    },    
     location: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'EventModel'
+    },
+    ticket_type: {
+        type: [String],
+        required: true,
     },
     quantity: {
         type: [Number],  
