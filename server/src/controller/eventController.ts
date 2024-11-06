@@ -17,7 +17,7 @@ const Organizer = require('../models/organizer');
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
     const user = await User.findById(_id)
-    const { name, description, image, day_start, day_end, ticket_number, price, location, quantity, status, event_type } = req.body;
+    const { name, description, image, day_start, day_end, ticket_number, price, location, ticket_type, quantity, status, event_type } = req.body;
     const event = new EventModel({
         name,
         description,
@@ -27,6 +27,7 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         ticket_number,
         price,
         location,
+        ticket_type,
         quantity,
         status,
         event_type,
@@ -39,11 +40,12 @@ const createEvent = asyncHandler(async (req: Request, res: Response) => {
         username: _id, 
         status: EventStatus.PENDING, 
         location: event._id, 
+        ticket_type: event.ticket_type,
         quantity: event.quantity,
         price: event.price,
     });
 
-    await seat.save();  // Lưu một document seat duy nhất
+    await seat.save();
 
     return res.status(200).json({
         status: event ? true : false,

@@ -21,9 +21,9 @@ const createSeat = asyncHandler(async (req: Request, res: Response) => {
     }
 
     const seat = new SeatModel({
-        username: '615f1f1f1f1f1f1f1f1f1f1f',   
-        status: SeatStatus.PENDING,  
-        location: event._id, 
+        username: '615f1f1f1f1f1f1f1f1f1f1f',
+        location: event._id,
+        ticket_type: event.ticket_type,
         quantity: event.quantity,
         price: event.price,
     });
@@ -58,8 +58,8 @@ const updateSeatStatus = asyncHandler(async (req: Request, res: Response) => {
 const getSeat = asyncHandler(async (req: Request, res: Response) => {
     const { sid } = req.params;
     const getseat = await SeatModel.findById(sid)
-        .populate('location')  // Đảm bảo rằng `location` được populate từ EventModel
-        .populate('quantity price');  // Thêm các thuộc tính cần thiết khác nếu cần
+        .populate('location')
+        .populate('ticket_type quantity price');
     return res.status(200).json({
         status: getseat ? true : false,
         code: getseat ? 200 : 400,
@@ -99,7 +99,7 @@ const getSeatByEventId = asyncHandler(async (req: Request, res: Response) => {
 const updateSeat = asyncHandler(async (req: Request, res: Response) => {
     const { sid } = req.params
     const updatedSeat = await seat.findByIdAndUpdate(sid, req.body, { new: true })
-        .populate('location quantity price');
+        .populate('location ticket_type quantity price');
     return res.status(200).json({
         status: updatedSeat ? true : false,
         code: updatedSeat ? 200 : 400,
