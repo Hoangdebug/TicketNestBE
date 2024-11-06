@@ -15,7 +15,7 @@ var orderSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId, ref:'User'
     },
     event:{
-        type: mongoose.Types.ObjectId, ref:'Event'
+        type: mongoose.Types.ObjectId, ref:'EventModel'
     },
     payment:{
         type:String,

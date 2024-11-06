@@ -2,8 +2,10 @@ import checkoutNodeJssdk from '@paypal/checkout-server-sdk';
 import { Request, Response } from 'express'
 const asyncHandler = require ("express-async-handler")
 const Order = require ('../models/order')
+const User = require('../models/user');
 import EventModel, { IEvent } from '~/models/event';
 import paypalClient from '~/config/paypalClient';
+import { Role } from '~/utils/Common/enum';
 
 interface PayPalLink {
     href: string;
@@ -178,6 +180,41 @@ const getOrder = asyncHandler(async (req: Request, res: Response) => {
     })    
 })
 
+const getOrderList = asyncHandler(async (req: Request, res: Response) => {
+    const { _id } = req.user;
+
+    const user = await User.findById(_id);
+    if (!user) {
+        return res.status(404).json({
+            status: false,
+            code: 404,
+            message: 'User not found',
+            result: null
+        });
+    }
+
+    let orders;
+
+    if (user.role === Role.ROLE_ADMIN) {
+        orders = await Order.find()
+        .populate('customer', 'username')
+        .populate('event', 'name location quantity price ticket_number day_start day_end')
+        ; 
+    } else {
+        orders = await Order.find({ customer: _id })
+        .populate('customer', 'username')
+        .populate('event', 'name location quantity price ticket_number day_start day_end')
+    }
+
+    return res.status(200).json({
+        status: true,
+        code: orders ? 200 : 400,
+        message: orders ? '' : 'Orders not found',
+        result: orders
+    });
+});
+
+
 // Update Order
 const updateOrder = asyncHandler(async (req: Request, res: Response) => {
     const {_id } = req.params
@@ -220,5 +257,6 @@ module.exports = {
     getOrder, 
     updateOrder, 
     deleteOrder,
-    captureOrder
+    captureOrder,
+    getOrderList,
 }
