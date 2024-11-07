@@ -84,7 +84,7 @@ const replyComment = asyncHandler(async (req: Request, res: Response) => {
             message: 'User or event not found',
         });
     }
-    const { comment } = req.body
+    const { replyCommemt: comment } = req.body
     const response = await Comment.create({
         userId: user._id,
         comment,
