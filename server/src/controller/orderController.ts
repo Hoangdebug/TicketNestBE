@@ -86,7 +86,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
           }
         ],
         application_context: {
-          return_url: 'http://localhost:4500/payment-return',
+          return_url: 'http://localhost:4500/user/payment/payment-return',
           cancel_url: 'http://localhost:4500/payment-cancel'
         }
       })

@@ -12,7 +12,7 @@ export enum TypeUser {
 
 export enum Status {
   PROCESSING = 'Processing',
-  ACCEPTED = 'Accept',
+  ACCEPTED = 'Accepted',
   REJECTED = 'Rejected'
 }
 
@@ -36,9 +36,9 @@ export enum EventStatus {
 }
 
 export enum OrderStatus {
-  CANCELLED = 'Cancelled',
+  CANCELLED = 'Cancel',
   PENDING = 'Pending',
-  SUCCESSED = 'Successed'
+  ACCEPTED = 'Accept'
 }
 
 export enum SeatStatus {
