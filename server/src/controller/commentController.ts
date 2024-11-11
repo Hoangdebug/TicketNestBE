@@ -134,26 +134,26 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
             message: 'Comment not found',
         });
     }
-    const hasReplies = await Comment.exists({ parentComment: idComment });
-    if (hasReplies) {
-        commentDetail.isDeleted = true;
-        await commentDetail.save();
-        response = commentDetail;
-    } else {
-        if (commentDetail.parentComment) {
-            console.log(commentDetail.parentComment)
-            const parentComment = await Comment.findById(commentDetail.parentComment);
-            
-            if (parentComment && parentComment.isDeleted) {
-                response = await Comment.findByIdAndDelete(idComment);
-            } else {
-                commentDetail.isDeleted = true;
-                await commentDetail.save();
-                response = commentDetail;
-            }
-        } else {
+    // const hasReplies = await Comment.exists({ parentComment: idComment });
+    // if (hasReplies) {
+    //     commentDetail.isDeleted = true;
+    //     await commentDetail.save();
+    //     response = commentDetail;
+    // } else {
+        
+    // }
+    if (commentDetail.parentComment) {
+        const parentComment = await Comment.findById(commentDetail.parentComment);
+        console.log(parentComment.parentComment)
+        if (parentComment && parentComment.isDeleted === true) {
             response = await Comment.findByIdAndDelete(idComment);
+        } else if(parentComment && parentComment.isDeleted === false){
+            commentDetail.isDeleted = true;
+            await commentDetail.save();
+            response = commentDetail;
         }
+    } else {
+        response = await Comment.findByIdAndDelete(idComment);
     }
         
     return res.status(200).json({
