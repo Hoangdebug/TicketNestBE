@@ -20,6 +20,10 @@ const commentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comment',
         default: null
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
@@ -32,7 +36,9 @@ commentSchema.methods.toJSON = function () {
     if (obj.updatedAt) {
         obj.updatedAt = moment(obj.updatedAt).tz('Asia/Ho_Chi_Minh').format('YYYY/MM/DD HH:mm');
     }
-
+    if (obj.isDeleted) {
+        obj.comment = 'Bình luận đã bị xóa';
+    }
     return obj;
 };
 

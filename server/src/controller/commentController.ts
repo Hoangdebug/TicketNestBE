@@ -100,6 +100,69 @@ const replyComment = asyncHandler(async (req: Request, res: Response) => {
     })
 })
 
+const editComment = asyncHandler(async (req: Request, res: Response) => {
+    const { idComment } = req.params
+    const { comment } = req.body
+    const commentDetail = await Comment.findById(idComment)?.populate('parentComment')
+
+    if(!commentDetail){
+        return res.status(404).json({
+            status: false,
+            code: 404,
+            message: 'Comment not found',
+        });
+    }
+
+    const response = await Comment.findByIdAndUpdate(idComment, {comment}, {new: true})
+    return res.status(200).json({
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? 'Update Comment successfully' : 'Failed to update comment',
+        result: response
+    })
+})
+
+const deleteComment = asyncHandler(async (req: Request, res: Response) => {
+    const { idComment } = req.params
+    let response;
+    const commentDetail = await Comment.findById(idComment);
+
+    if(!commentDetail){
+        return res.status(404).json({
+            status: false,
+            code: 404,
+            message: 'Comment not found',
+        });
+    }
+    const hasReplies = await Comment.exists({ parentComment: idComment });
+    if (hasReplies) {
+        commentDetail.isDeleted = true;
+        await commentDetail.save();
+        response = commentDetail;
+    } else {
+        if (commentDetail.parentComment) {
+            console.log(commentDetail.parentComment)
+            const parentComment = await Comment.findById(commentDetail.parentComment);
+            
+            if (parentComment && parentComment.isDeleted) {
+                response = await Comment.findByIdAndDelete(idComment);
+            } else {
+                commentDetail.isDeleted = true;
+                await commentDetail.save();
+                response = commentDetail;
+            }
+        } else {
+            response = await Comment.findByIdAndDelete(idComment);
+        }
+    }
+        
+    return res.status(200).json({
+        status: response ? true : false,
+        code: response ? 200 : 400,
+        message: response ? 'Delete Comment successfully' : 'Failed to delete comment',
+    })
+})
+
 const getListCommentById = asyncHandler(async (req: Request, res: Response) => {
     const {eid, idComment} = req.params
     const event = await EventModel.findById(eid)?.populate('created_by')
@@ -130,5 +193,7 @@ export {
     createComment,
     getListCommentByIdEvent,
     replyComment,
-    getListCommentById
+    getListCommentById,
+    editComment,
+    deleteComment
 }
