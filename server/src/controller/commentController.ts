@@ -85,6 +85,10 @@ const replyComment = asyncHandler(async (req: Request, res: Response) => {
         });
     }
     const { replyCommemt: comment } = req.body
+
+    commentDetail.isReply = true;
+    await commentDetail.save();
+
     const response = await Comment.create({
         userId: user._id,
         comment,
@@ -134,26 +138,18 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
             message: 'Comment not found',
         });
     }
-    // const hasReplies = await Comment.exists({ parentComment: idComment });
-    // if (hasReplies) {
-    //     commentDetail.isDeleted = true;
-    //     await commentDetail.save();
-    //     response = commentDetail;
-    // } else {
-        
-    // }
-    if (commentDetail.parentComment) {
-        const parentComment = await Comment.findById(commentDetail.parentComment);
-        console.log(parentComment.parentComment)
-        if (parentComment && parentComment.isDeleted === true) {
-            response = await Comment.findByIdAndDelete(idComment);
-        } else if(parentComment && parentComment.isDeleted === false){
+
+    if (commentDetail.isReply === false) {
+        response = await Comment.findByIdAndDelete(idComment);
+    } else {
+        const replies = await Comment.find({ parentComment: idComment });
+        if (replies.length > 0) {
             commentDetail.isDeleted = true;
             await commentDetail.save();
             response = commentDetail;
+        } else {
+            response = await Comment.findByIdAndDelete(idComment);
         }
-    } else {
-        response = await Comment.findByIdAndDelete(idComment);
     }
         
     return res.status(200).json({
