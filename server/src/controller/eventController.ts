@@ -17,13 +17,14 @@ const Organizer = require('../models/organizer');
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
     const user = await User.findById(_id)
-    const { name, description, image, day_start, day_end, ticket_number, price, location, ticket_type, quantity, status, event_type } = req.body;
+    const { name, description, image, day_start, day_end, day_event, ticket_number, price, location, ticket_type, quantity, status, event_type } = req.body;
     const event = new EventModel({
         name,
         description,
         image,
         day_start,
         day_end,
+        day_event,
         ticket_number,
         price,
         location,
