@@ -9,7 +9,7 @@ import { Request, Response } from "express"
 import { SeatStatus } from '~/utils/Common/enum';
 
 const createSeat = asyncHandler(async (req: Request, res: Response) => {
-    const { eventId } = req.body;
+    const { eventId, ordered_seat } = req.body;
 
     if (!eventId) {
         return res.status(400).json({ success: false, mes: "Event ID is missing" });
@@ -26,6 +26,7 @@ const createSeat = asyncHandler(async (req: Request, res: Response) => {
         ticket_type: event.ticket_type,
         quantity: event.quantity,
         price: event.price,
+        ordered_seat,
     });
 
     await seat.save();
@@ -108,10 +109,45 @@ const updateSeat = asyncHandler(async (req: Request, res: Response) => {
     })
 })
 
+const updateOrderSeat = asyncHandler(async (req: Request, res: Response) => {
+    const { seatId } = req.params;
+    const { new_ordered_seat } = req.body;
+
+    if (!seatId || !new_ordered_seat || !Array.isArray(new_ordered_seat)) {
+        return res.status(400).json({ 
+            success: false, 
+            message: "Seat ID and new ordered seats are required" 
+        });
+    }
+
+    const seat = await SeatModel.findById(seatId);
+    if (!seat) {
+        return res.status(404).json({ 
+            success: false, 
+            message: "Seat not found" 
+        });
+    }
+
+    const updatedOrderedSeats = [
+        ...new Set([...seat.ordered_seat, ...new_ordered_seat])
+    ];
+    seat.ordered_seat = updatedOrderedSeats;
+
+    await seat.save();
+
+    return res.status(200).json({
+        success: true,
+        message: "Ordered seats updated successfully",
+        result: seat
+    });
+});
+
+
 module.exports = {
     createSeat,
     updateSeatStatus,
     getSeat,
     updateSeat,
-    getSeatByEventId
+    getSeatByEventId,
+    updateOrderSeat
 }
