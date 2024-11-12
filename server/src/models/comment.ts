@@ -24,6 +24,10 @@ const commentSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+    isReply:{
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
