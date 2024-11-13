@@ -16,9 +16,9 @@ interface PayPalLink {
 const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const { _id } = req.user
   const { eid } = req.params
-  const { seatcode, totalmoney, paymentCode } = req.body
+  const { seat_code, total_money, payment } = req.body
 
-  if (!seatcode || !totalmoney) {
+  if (!seat_code || !total_money) {
     return res.status(400).json({
       status: false,
       code: 400,
@@ -39,8 +39,9 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
 
     const ticketNumber = event.ticket_number ?? 0
 
-    const seatCount = seatcode.length
-    if (ticketNumber < seatCount) {
+    const seatCount = seat_code.length
+    console.log(event.ticket_number)
+    if (ticketNumber > seatCount) {
       return res.status(400).json({
         status: false,
         code: 400,
@@ -50,8 +51,8 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     }
 
     const order = new Order({
-      seat_code: seatcode,
-      total_money: totalmoney,
+      seat_code: seat_code,
+      total_money: total_money,
       customer: _id,
       event: eid
     })
@@ -70,7 +71,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     event.ticket_number = ticketNumber - seatCount
     await event.save()
 
-    if (paymentCode === 'paypal') {
+    if (payment === 'paypal') {
       const request = new checkoutNodeJssdk.orders.OrdersCreateRequest()
       request.prefer('return=representation')
       request.requestBody({
@@ -80,7 +81,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
             reference_id: order._id.toString(),
             amount: {
               currency_code: 'USD',
-              value: totalmoney.toString()
+              value: total_money.toString()
             },
             description: `Payment for order: ${order._id}`
           }
