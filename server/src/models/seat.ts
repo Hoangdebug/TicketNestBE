@@ -7,6 +7,7 @@ export interface ISeat extends Document {
     location: mongoose.Types.ObjectId;
     quantity: number[]; 
     price: number[];
+    ordered_seat: String[];
 }
 
 // Declare the Schema of the Mongo model
@@ -29,6 +30,10 @@ var seatSchema: Schema<ISeat> = new mongoose.Schema({
     },
     price: {
         type: [Number], 
+        required: true,
+    },
+    ordered_seat: {
+        type: [String], 
         required: true,
     }
 });

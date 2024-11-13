@@ -8,5 +8,6 @@ router.get('/:sid', ctrls.getSeat);
 router.get('/event/:eventId', ctrls.getSeatByEventId);
 router.put('/:sid', [verifyAccessToken], ctrls.updateSeat);
 router.put('/update-status/:eid', [verifyAccessToken, isAdmin], ctrls.updateSeatStatus);
+router.put('/update-order/:seatId', ctrls.updateOrderSeat);
 
 module.exports = router;
