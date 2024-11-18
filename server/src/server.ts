@@ -6,6 +6,7 @@ import { checkAndUpdateEventStatus } from './controller/eventController'
 import cron from 'node-cron'
 import { PassThrough } from 'stream'
 require('dotenv').config()
+const User = require('../src/models/user')
 const initRoutes = require('./routes/index')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
@@ -42,9 +43,27 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:5000/api/user/auth/google/callback'
     },
-    (accessToken:any, refreshToken:any, profile:any, done:any) => {
+    async (accessToken:any, refreshToken:any, profile:any, done:any) => {
       console.log(profile)
-      return done(null, profile)
+      const dataUser = {
+        username: profile?.displayName,
+        email: profile?.emails[0].value,
+        avatar: profile?.photos[0].value,
+        isActive: true,
+      }
+
+      try {
+        let user = await User.findOne({ email: dataUser.email });
+        console.log(user)
+        if (user) {
+          done(null, user)
+        } else {
+          user = await User.create(dataUser)
+          done(null, user)
+        }
+      } catch (err) {
+        console.error(err)
+      }
     }
   )
 )

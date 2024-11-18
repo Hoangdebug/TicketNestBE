@@ -31,7 +31,6 @@ const crypto = require('crypto')
         },
         password:{
             type:String,
-            required:true,
         },
         role: {
             type: String,
