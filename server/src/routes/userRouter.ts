@@ -3,6 +3,7 @@ const ctrls = require('../controller/userController')
 const router = express.Router()
 const { verifyAccessToken, isAdmin, isOrganizer } = require('../middlewares/verifyToken')
 const uploadCloud = require('../config/cloudinary.config')
+const passport = require('passport')
 
 router.post('/register', ctrls.register)
 router.post('/verify-register/:email', ctrls.verifyOtp)
@@ -21,4 +22,11 @@ router.post('/create-account-by-admin', [verifyAccessToken, isAdmin], ctrls.crea
 router.put('/:id', [verifyAccessToken, isAdmin], ctrls.updateUserbyAdmin)
 router.put('/ban/:uid', [verifyAccessToken, isAdmin], ctrls.banUserByAdmin)
 router.put('/role/:uid', [verifyAccessToken, isAdmin], ctrls.organizerPermitByAdmin)
+
+// google
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', "email"] }))
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+    console.log('User:', req.user);
+  res.redirect('http://localhost:4500/home')
+})
 module.exports = router
