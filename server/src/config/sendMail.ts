@@ -32,6 +32,9 @@ const sendMail = asyncHandler(async ({email, html, type} : {email: string, html:
             subject = "Organizer Request Rejected";
             text = `Hello,\n\nYour request to become an organizer has been rejected.\n`;
             break;
+        case 'order_details':
+            subject = "Your Order Details from TicketNest";
+            break;
         default:
             throw new Error('Invalid email type');
     }

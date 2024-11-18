@@ -237,7 +237,7 @@ const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     if (!user) throw new Error('User not found!! Invalid email');
     const otp = user.createOtp()
     await user.save();
-
+  
     let type = 'forgot_password'
     // Send mail
     const html = `
