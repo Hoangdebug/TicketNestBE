@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const passport = require('passport')
 const session = require('express-session')
-const googleStrategy = require('passport-google-oauth20').Strategy
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 
 // Khởi tạo ứng dụng Express
 const app = express()
@@ -21,12 +21,11 @@ app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
-dbConnect()
-initRoutes(app)
+
 
 app.use(
   session({
-    secret: process.env.JWT_SECRET,
+    secret: "secret",
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
@@ -36,33 +35,50 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
+function generateRandomPhoneNumber() {
+  const prefix = '09';
+  let phoneNumber = prefix;
+
+  for (let i = 0; i < 8; i++) {
+    // Tạo một chữ số ngẫu nhiên từ 0 đến 9
+    const randomDigit = Math.floor(Math.random() * 10);
+    phoneNumber += randomDigit;
+  }
+
+  return phoneNumber;
+}
+
 passport.use(
-  new googleStrategy(
+
+  new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:5000/api/user/auth/google/callback'
+      callbackURL: '/api/user/auth/google/callback',
     },
-    async (accessToken:any, refreshToken:any, profile:any, done:any) => {
-      console.log(profile)
+    async (accessToken: any, refreshToken: any, profile: any) => {
+      console.log(profile);
+      const randomPhone = generateRandomPhoneNumber();
       const dataUser = {
         username: profile?.displayName,
         email: profile?.emails[0].value,
-        avatar: profile?.photos[0].value,
-        isActive: true,
-      }
-
+        images: profile?._json.picture,
+        isActive: profile?._json.email_verified,
+        phone: randomPhone
+      };
+    
       try {
         let user = await User.findOne({ email: dataUser.email });
-        console.log(user)
+        console.log(user);
         if (user) {
-          done(null, user)
+          return user;
         } else {
-          user = await User.create(dataUser)
-          done(null, user)
+          user = await User.create(dataUser);
+          return user;
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
+        throw err;
       }
     }
   )
@@ -75,14 +91,13 @@ passport.deserializeUser((user: any, done: any) => {
   done(null, user)
 })
 
-// app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }))
-// app.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: "/"}), (req, res) => {
-//   res.redirect('/auth/google/success')
+dbConnect()
+initRoutes(app)
+// app.get('http://localhost:5000/api/user/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
+// app.get('http://localhost:5000/api/user/auth/google/callback', passport.authenticate('google', { failureRedirect: "/" }), (req, res) => {
+//   res.redirect("http://localhost:4500/home");  
 // })
 
-// app.get("/profile", (req, res) => {
-//   res.send(req.user)
-// })
 // Định nghĩa một route cơ bản
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!')
