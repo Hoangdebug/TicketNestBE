@@ -26,7 +26,7 @@ router.put('/role/:uid', [verifyAccessToken, isAdmin], ctrls.organizerPermitByAd
 // google
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
-router.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: "/"}), (req, res) => {
-  res.redirect("http://localhost:4500/home");  
-})
+// router.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: "/"}), (req, res) => {
+//   res.redirect("http://localhost:4500/home");  
+// })
 module.exports = router

@@ -54,7 +54,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/user/auth/google/callback',
+      callbackURL: 'http://localhost:5000/api/user/auth/google/callback',
     },
     async (accessToken: any, refreshToken: any, profile: any) => {
       console.log(profile);
@@ -94,9 +94,10 @@ passport.deserializeUser((user: any, done: any) => {
 dbConnect()
 initRoutes(app)
 // app.get('http://localhost:5000/api/user/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
-// app.get('http://localhost:5000/api/user/auth/google/callback', passport.authenticate('google', { failureRedirect: "/" }), (req, res) => {
-//   res.redirect("http://localhost:4500/home");  
-// })
+app.get('http://localhost:5000/api/user/auth/google/callback', passport.authenticate('google', { failureRedirect: "/" }), (req, res) => {
+  console.log("ok")
+  res.redirect("http://localhost:4500/home");  
+})
 
 // Định nghĩa một route cơ bản
 app.get('/', (req: Request, res: Response) => {
