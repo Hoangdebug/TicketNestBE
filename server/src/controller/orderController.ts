@@ -1,10 +1,21 @@
 import checkoutNodeJssdk from '@paypal/checkout-server-sdk';
 import { Request, Response } from 'express'
+<<<<<<< Updated upstream
 const asyncHandler = require ("express-async-handler")
 const Order = require ('../models/order')
 import EventModel, { IEvent } from '~/models/event';
 import paypalClient from '~/config/paypalClient';
 
+=======
+const asyncHandler = require('express-async-handler')
+const Order = require('../models/order')
+const User = require('../models/user')
+import EventModel, { IEvent } from '~/models/event'
+import paypalClient from '~/config/paypalClient'
+import { Role } from '~/utils/Common/enum'
+const { generalQRCode } = require('./QRCodeController');
+const sendMail = require('../config/sendMail')
+>>>>>>> Stashed changes
 interface PayPalLink {
     href: string;
     rel: string;
@@ -24,6 +35,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
         });
     }
 
+<<<<<<< Updated upstream
     try {
         const event = await EventModel.findById(eid);
         if (!event) {
@@ -33,6 +45,51 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
                 message: 'Event not found',
                 result: null
             });
+=======
+    const ticketNumber = event.ticket_number ?? 0
+
+    const seatCount = seatcode.length
+
+    const order = new Order({
+      seat_code: seatcode,
+      total_money: totalmoney,
+      customer: _id,
+      event: eid
+    })
+
+    await order.save()
+
+    if (!order) {
+      return res.status(400).json({
+        status: false,
+        code: 400,
+        message: 'Failed to create order',
+        result: null
+      })
+    }
+
+    event.ticket_number = ticketNumber - seatCount
+    await event.save()
+
+    if (paymentCode === 'paypal') {
+      const request = new checkoutNodeJssdk.orders.OrdersCreateRequest()
+      request.prefer('return=representation')
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            reference_id: order._id.toString(),
+            amount: {
+              currency_code: 'USD',
+              value: totalmoney.toString()
+            },
+            description: `Payment for order: ${order._id}`
+          }
+        ],
+        application_context: {
+          return_url: 'http://localhost:4500/user/payment/payment-return',
+          cancel_url: 'http://localhost:4500/payment-cancel'
+>>>>>>> Stashed changes
         }
 
         const ticketNumber = event.ticket_number ?? 0;
@@ -214,6 +271,7 @@ const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
         result: response 
     })    
 })
+<<<<<<< Updated upstream
 
 module.exports = { 
     createOrder, 
@@ -222,3 +280,117 @@ module.exports = {
     deleteOrder,
     captureOrder
 }
+=======
+
+const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { orderId } = req.params;
+
+
+
+
+
+
+
+
+  try {
+    // Lấy thông tin đơn hàng
+    const order = await Order.findById(orderId)
+      .populate({
+        path: 'customer',
+        select: 'username email phone',
+      })
+      .populate({
+        path: 'event',
+        select: 'name day_event location event_type',
+      });
+
+    if (!order) {
+      return res.status(404).json({
+        status: false,
+        code: 404,
+        message: 'Order not found',
+        result: null,
+      });
+    }
+
+
+
+
+
+    // Dữ liệu QR
+    const qrData = {
+      customerName: order.customer.username,
+      email: order.customer.email,
+      phone: order.customer.phone,
+      eventName: order.event.name,
+      location: order.event.location,
+      eventType: order.event.event_type,
+      eventDate: new Date(order.event.day_event).toISOString(),
+      seats: order.seat_code,
+      totalMoney: order.total_money,
+      paymentStatus: order.payment,
+    };
+
+    // Tạo QR Code và upload lên Cloudinary
+    const qrCodeUrl = await generalQRCode(qrData);
+    // Nội dung email
+    const htmlContent = `
+      <h1>Order Details</h1>
+      <p><strong>Customer Name:</strong> ${order.customer.username}</p>
+      <p><strong>Email:</strong> ${order.customer.email}</p>
+      <p><strong>Phone:</strong> ${order.customer.phone}</p>
+      <p><strong>Event:</strong> ${order.event.name}</p>
+      <p><strong>Location:</strong> ${order.event.location}</p>
+      <p><strong>Event Type:</strong> ${order.event.event_type}</p>
+      <p><strong>Event Date:</strong> ${new Date(order.event.day_event).toLocaleString()}</p>
+      <p><strong>Seats:</strong> ${order.seat_code.join(', ')}</p>
+      <p><strong>Total Money:</strong> $${order.total_money}</p>
+      <p><strong>Payment Status:</strong> ${order.payment}</p>
+      <h2>QR Code:</h2>
+      <img src="${qrCodeUrl}" alt="QR Code" />
+    `;
+
+
+
+
+
+
+    // Gửi email
+    await sendMail({
+      email: order.customer.email,
+      html: htmlContent,
+      type: 'order_details',
+    });
+
+    res.status(200).json({
+      status: true,
+      code: 200,
+      message: 'Order details and QR code sent to email successfully',
+      result: order,
+    });
+  } catch (error) {
+    console.error('Error sending order email:', error);
+    res.status(500).json({
+      status: false,
+      code: 500,
+      message: 'Failed to send order email',
+      result: null,
+    });
+  }
+});
+
+
+
+
+
+
+module.exports = {
+  createOrder,
+  getOrder,
+  updateOrder,
+  deleteOrder,
+  captureOrder,
+  sendOrderEmail,
+  getOrderList
+}
+>>>>>>> Stashed changes
