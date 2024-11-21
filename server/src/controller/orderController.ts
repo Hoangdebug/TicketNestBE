@@ -283,18 +283,18 @@ const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
     }
 
     // Dữ liệu QR
-    const qrData = {
-      customerName: order.customer.username,
-      email: order.customer.email,
-      phone: order.customer.phone,
-      eventName: order.event.name,
-      location: order.event.location,
-      eventType: order.event.event_type,
-      eventDate: new Date(order.event.day_event).toISOString(),
-      seats: order.seat_code,
-      totalMoney: order.total_money,
-      paymentStatus: order.payment,
-    };
+    const qrData = `
+      Customer: ${order.customer.username}
+      Email: ${order.customer.email}
+      Phone: ${order.customer.phone}
+      Event: ${order.event.name}
+      Location: ${order.event.location}
+      Event Type: ${order.event.event_type}
+      Event Date: ${new Date(order.event.day_event).toLocaleString()}
+      Seats: ${order.seat_code.join(', ')}
+     Total Money: $${order.total_money}
+    Payment Status: ${order.payment}
+    `;
 
     // Tạo QR Code và upload lên Cloudinary
     const qrCodeUrl = await generalQRCode(qrData);
