@@ -6,6 +6,8 @@ const organizerRouter = require("./organizerRouter")
 const eventRouter = require("./eventRouter")
 const orderRouter = require("./orderRouter")
 const adminRouter = require("./adminRouter")
+const commentRouter = require("./commentRouter")
+const ratingRouter = require("./ratingRouter")
 
 const { notFound, errHandler } = require('../middlewares/errorHandler')
 
@@ -17,6 +19,8 @@ const initRoutes = (app: Application) => {
     app.use('/api/seat', seatRouter)
     app.use('/api/organizer', organizerRouter)
     app.use('/api/admin', adminRouter)
+    app.use('/api/comment', commentRouter)
+    app.use('/api/rating', ratingRouter)
     app.use(notFound)
     app.use(errHandler)
 }

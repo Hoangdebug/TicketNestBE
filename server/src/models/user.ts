@@ -7,14 +7,14 @@ const crypto = require('crypto')
     var userSchema = new mongoose.Schema({
         username:{
             type:String,
-            required:true,
+            // required:true,
         },
         dob:{
             type:String,
         },
         email:{
             type:String,
-            required:true,
+            // required:true,
             unique:true,
         },
         images:{
@@ -27,11 +27,10 @@ const crypto = require('crypto')
         },
         phone:{
             type:String,
-            unique:true,
+            // unique:true,
         },
         password:{
             type:String,
-            required:true,
         },
         role: {
             type: String,

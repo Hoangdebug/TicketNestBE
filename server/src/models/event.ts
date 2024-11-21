@@ -7,9 +7,12 @@ export interface IEvent extends Document {
     images: string;
     day_start: Date;
     day_end: Date;
+    day_event: Date;
     ticket_number?: number | undefined;
-    price: number;
+    price: number[];
     location: string;
+    ticket_type: String[];
+    quantity: number[];
     event_type: EventType;
     is_active: boolean;
     status: EventStatus;
@@ -37,16 +40,29 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
         type: Date,
         required: true,
     },
+    day_event: {
+        type: Date,
+        required: true,
+    },
     ticket_number: {
-        type: Number,
+        type: [Number],
         default: 0,
     },
     price: {
-        type: Number,
+        type: [Number],
         required: true,
     },
     location: {
         type: String,
+        required: true,
+        enum: ['Location A', 'Location B', 'Location C', 'ANOTHER'],
+    },
+    ticket_type: {
+        type: [String],
+        required: true,
+    },
+    quantity: {
+        type: [Number],
         required: true,
     },
     event_type: {
