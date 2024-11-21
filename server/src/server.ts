@@ -16,7 +16,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy
 
 // Khởi tạo ứng dụng Express
 const app = express()
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 5000
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -54,10 +54,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:5000/api/user/auth/google/callback',
+      callbackURL: process.env.GOOGLE_CALLBACK,
     },
     async (accessToken: any, refreshToken: any, profile: any) => {
-      console.log(profile);
       const randomPhone = generateRandomPhoneNumber();
       const dataUser = {
         username: profile?.displayName,
@@ -66,7 +65,7 @@ passport.use(
         isActive: profile?._json.email_verified,
         phone: randomPhone
       };
-    
+
       try {
         let user = await User.findOne({ email: dataUser.email });
         console.log(user);
@@ -93,11 +92,6 @@ passport.deserializeUser((user: any, done: any) => {
 
 dbConnect()
 initRoutes(app)
-// app.get('http://localhost:5000/api/user/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
-app.get('http://localhost:5000/api/user/auth/google/callback', passport.authenticate('google', { failureRedirect: "/" }), (req, res) => {
-  console.log("ok")
-  res.redirect("http://localhost:4500/home");  
-})
 
 // Định nghĩa một route cơ bản
 app.get('/', (req: Request, res: Response) => {
