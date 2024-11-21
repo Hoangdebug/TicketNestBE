@@ -6,7 +6,7 @@ var ticketSchema = new mongoose.Schema({
         user: {type:mongoose.Types.ObjectId, ref:'User'},
     },
     eventname:{
-        event: {type:mongoose.Types.ObjectId, ref:'Event'},        
+        event: {type:mongoose.Types.ObjectId, ref:'EventModel'},        
     },
     seatcode:{
         seatcode: {type:mongoose.Types.ObjectId, ref:'Seat'},        
@@ -17,5 +17,4 @@ var ticketSchema = new mongoose.Schema({
     },
 });
 
-//Export the model
 module.exports = mongoose.model('Ticket', ticketSchema);

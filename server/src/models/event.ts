@@ -86,6 +86,6 @@ var eventSchema: Schema<IEvent> = new mongoose.Schema({
 }, { timestamps: true, collection: "events" });
 
 //Export the model
-const EventModel: Model<IEvent> = mongoose.model<IEvent>("Event", eventSchema);  // Đăng ký model
+const EventModel: Model<IEvent> = mongoose.model<IEvent>("EventModel", eventSchema);  // Đăng ký model
 
 export default EventModel
