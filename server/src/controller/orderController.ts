@@ -258,45 +258,6 @@ const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
     result: response
   })
 })
-const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
-  const { orderId } = req.params
-
-  try {
-    // Lấy thông tin đơn hàng
-    const order = await Order.findById(orderId)
-      .populate({
-        path: 'customer',
-        select: 'username email phone'
-      })
-      .populate({
-        path: 'event',
-        select: 'name day_event location event_type'
-      })
-
-    if (!order) {
-      return res.status(404).json({
-        status: false,
-        code: 404,
-        message: 'Order not found',
-        result: null
-      })
-    }
-
-    // Dữ liệu email
-    const { seat_code, total_money, customer, event, payment } = order
-    const htmlContent = `
-          <h1>Order Details</h1>
-          <p><strong>Customer Name:</strong> ${customer.username}</p>
-          <p><strong>Email:</strong> ${customer.email}</p>
-          <p><strong>Phone:</strong> ${customer.phone}</p>
-          <p><strong>Event:</strong> ${event.name}</p>
-          <p><strong>Location:</strong> ${event.location}</p>
-          <p><strong>Event Type:</strong> ${event.event_type}</p>
-          <p><strong>Event Date:</strong> ${new Date(event.day_event).toLocaleString()}</p>
-          <p><strong>Seats:</strong> ${seat_code.join(', ')}</p>
-          <p><strong>Total Money:</strong> $${total_money}</p>
-          <p><strong>Payment Status:</strong> ${payment}</p>
-      `
 
 const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
   const { orderId } = req.params;
