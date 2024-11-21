@@ -9,6 +9,7 @@
       "skipLibCheck": true /* Skip type checking all .d.ts files. */,
       "baseUrl": ".", // Đường dẫn base cho các import
       "types": ["mongoose"],
+      "noImplicitAny": false,
       "paths": {
         "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)
       }

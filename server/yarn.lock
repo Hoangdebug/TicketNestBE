@@ -10,6 +10,7 @@
     "@jridgewell/trace-mapping" "0.3.9"
 
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.4.0":
+
   "integrity" "sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA=="
   "resolved" "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.4.0.tgz"
   "version" "4.4.0"
@@ -141,6 +142,7 @@
     "@paypal/paypalhttp" "^1.0.1"
 
 "@paypal/paypalhttp@^1.0.1":
+
   "integrity" "sha512-DC7AHxTT7drF6dUi3YaFdPVuT15sIkpD5H2eHmdtFgxM4UanS1o1ZDfMhR9mpxd8o+X6pz2r+EZVRRq+n1cssQ=="
   "resolved" "https://registry.npmjs.org/@paypal/paypalhttp/-/paypalhttp-1.0.1.tgz"
   "version" "1.0.1"
@@ -184,6 +186,7 @@
     "@types/node" "*"
 
 "@types/connect@*":
+
   "integrity" "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug=="
   "resolved" "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz"
   "version" "3.4.38"
@@ -265,6 +268,7 @@
     "@types/node" "*"
 
 "@types/serve-static@*":
+
   "integrity" "sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw=="
   "resolved" "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.7.tgz"
   "version" "1.15.7"
@@ -274,6 +278,7 @@
     "@types/send" "*"
 
 "@types/webidl-conversions@*":
+
   "integrity" "sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA=="
   "resolved" "https://registry.npmjs.org/@types/webidl-conversions/-/webidl-conversions-7.0.3.tgz"
   "version" "7.0.3"
@@ -286,6 +291,7 @@
     "@types/webidl-conversions" "*"
 
 "@typescript-eslint/eslint-plugin@^7.9.0":
+
   "integrity" "sha512-6e+X0X3sFe/G/54aC3jt0txuMTURqLyekmEHViqyA2VnxhLMpvA6nqmcjIy+Cr9tLDHPssA74BP5Mx9HQIxBEA=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/eslint-plugin/-/eslint-plugin-7.9.0.tgz"
   "version" "7.9.0"
@@ -295,6 +301,7 @@
     "@typescript-eslint/type-utils" "7.9.0"
     "@typescript-eslint/utils" "7.9.0"
     "@typescript-eslint/visitor-keys" "7.9.0"
+
     "graphemer" "^1.4.0"
     "ignore" "^5.3.1"
     "natural-compare" "^1.4.0"
@@ -309,6 +316,7 @@
     "@typescript-eslint/types" "7.9.0"
     "@typescript-eslint/typescript-estree" "7.9.0"
     "@typescript-eslint/visitor-keys" "7.9.0"
+
     "debug" "^4.3.4"
 
 "@typescript-eslint/scope-manager@7.9.0":
@@ -320,6 +328,7 @@
     "@typescript-eslint/visitor-keys" "7.9.0"
 
 "@typescript-eslint/type-utils@7.9.0":
+
   "integrity" "sha512-6Qy8dfut0PFrFRAZsGzuLoM4hre4gjzWJB6sUvdunCYZsYemTkzZNwF1rnGea326PHPT3zn5Lmg32M/xfJfByA=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/type-utils/-/type-utils-7.9.0.tgz"
   "version" "7.9.0"
@@ -359,6 +368,7 @@
     "@typescript-eslint/typescript-estree" "7.9.0"
 
 "@typescript-eslint/visitor-keys@7.9.0":
+
   "integrity" "sha512-iESPx2TNLDNGQLyjKhUvIKprlP49XNEK+MvIf9nIO7ZZaZdbnfWKHnXAgufpxqfA0YryH8XToi4+CjBgVnFTSQ=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-7.9.0.tgz"
   "version" "7.9.0"
@@ -962,6 +972,7 @@
     "@humanwhocodes/module-importer" "^1.0.1"
     "@nodelib/fs.walk" "^1.2.8"
     "@ungap/structured-clone" "^1.2.0"
+
     "ajv" "^6.12.4"
     "chalk" "^4.0.0"
     "cross-spawn" "^7.0.2"
