@@ -175,6 +175,15 @@ const login = asyncHandler( async (req: Request, res: Response) => {
     }
 })
 
+const authGoogle = asyncHandler( async (req: Request, res: Response) => {
+    const accessToken = generateAccessToken(req.user._id, req.user.role)
+    console.log("CONTROLLER___:",accessToken)
+    return res.status(200).json({
+        success: true,
+        code: 200,
+        accessToken,
+    })
+})
 
 const getCurrent = asyncHandler( async (req: Request, res: Response) => {
     const { _id } = req.user
@@ -590,5 +599,6 @@ module.exports = {
     uploadImage,
     updateRolebyAdmin,
     userRequestOrganizer,
-    organizerPermitByAdmin
+    organizerPermitByAdmin,
+    authGoogle
 }
