@@ -1,28 +1,34 @@
-import { OrderStatus } from "~/utils/Common/enum";
+import { OrderStatus } from '~/utils/Common/enum'
 
-const mongoose = require('mongoose'); // Erase if already required
+const mongoose = require('mongoose') // Erase if already required
 
 // Declare the Schema of the Mongo model
-var orderSchema = new mongoose.Schema({    
-    seat_code:[{      
-        type:String, 
-    }],
-    total_money:{
-        type:String,
-        required:true,
+var orderSchema = new mongoose.Schema(
+  {
+    seat_code: [
+      {
+        type: String
+      }
+    ],
+    total_money: {
+      type: String,
+      required: true
     },
-    customer:{
-        type: mongoose.Types.ObjectId, ref:'User'
+    customer: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User'
     },
-    event:{
-        type: mongoose.Types.ObjectId, ref:'Event'
+    event: {
+      type: mongoose.Types.ObjectId,
+      ref: 'EventModel'
     },
-    payment:{
-        type:String,
-        default: OrderStatus.SUCCESSED
+    payment: {
+      type: String,
+      default: OrderStatus.ACCEPTED
     }
-
-}, {timeStamp: true});
+  },    
+  { timeStamp: true }
+)
 
 //Export the model
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('Order', orderSchema)

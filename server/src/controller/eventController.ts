@@ -4,6 +4,7 @@ import moment from 'moment';
 import { FilterQuery } from 'mongoose';
 import { getAllWithPagination } from '~/core/pagination';
 import EventModel, { IEvent } from '~/models/event';
+import SeatModel, { ISeat } from '~/models/seat';
 import { EventStatus } from '~/utils/Common/enum';
 const asyncHandler = require("express-async-handler")
 const Order = require('../models/order');
@@ -16,29 +17,44 @@ const Organizer = require('../models/organizer');
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
     const user = await User.findById(_id)
-    const { name, description, image, day_start, day_end, ticket_number, price, location, status, event_type } = req.body;
+    const { name, description, image, day_start, day_end, day_event, ticket_number, price, location, ticket_type, quantity, status, event_type } = req.body;
     const event = new EventModel({
         name,
         description,
         image,
         day_start,
         day_end,
+        day_event,
         ticket_number,
         price,
         location,
+        ticket_type,
+        quantity,
         status,
         event_type,
         created_by: user.organizerRef
     });
     await event.save();
     console.log(event)
+
+    const seat = new SeatModel({
+        username: _id, 
+        status: EventStatus.PENDING, 
+        location: event._id, 
+        ticket_type: event.ticket_type,
+        quantity: event.quantity,
+        price: event.price,
+    });
+
+    await seat.save();
+
     return res.status(200).json({
         status: event ? true : false,
         code: event ? 200 : 400,
         message: event ? 'Event created successfully' : 'Failed to create event',
         result: event
     });
-})
+});
 
 //Read EventModel
 const readEvent = asyncHandler(async (req: Request, res: Response) => {
@@ -53,6 +69,17 @@ const readEvent = asyncHandler(async (req: Request, res: Response) => {
         result: event
     });
 })
+
+const getLocation = asyncHandler(async (req: Request, res: Response) => {
+    const validLocations = ['Location A', 'Location B', 'Location C', 'ANOTHER'];
+
+    return res.status(200).json({
+        status: true,
+        code: 200,
+        message: 'Get valid locations successfully',
+        result: validLocations
+    });
+});
 
 const getEventByOrganizer = asyncHandler(async (req: Request, res: Response) => {
     const { _id } = req.user;
@@ -100,6 +127,9 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
         }
     }
 
+    const totalEvents = await EventModel.countDocuments(findCondition);
+    const totalPage = Math.ceil(totalEvents / Number(pageSize));
+    
     const response = await getAllWithPagination<IEvent>(EventModel,
         {
             page: page as number,
@@ -112,9 +142,11 @@ const getAllEventsWithPagination = asyncHandler(async (req: Request, res: Respon
         status: response ? true : false,
         code: response ? 200 : 400,
         message: response ? 'Get all events successfully' : 'Failed to get all events',
-        result: response
+        result: response,
+        totalPage,
     })
-})
+});
+
 
 //Update EventModel
 const updateEvent = asyncHandler(async (req: Request, res: Response) => {
@@ -278,5 +310,6 @@ export {
     getAllEventsWithPagination,
     uploadImage,
     updateEventsStatus, 
+    getLocation,
     // getTotalOrderByMonth,
 }

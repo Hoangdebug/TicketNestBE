@@ -7,6 +7,7 @@ import EventModel, { IEvent } from '~/models/event'
 import paypalClient from '~/config/paypalClient'
 import { Role } from '~/utils/Common/enum'
 const { generalQRCode } = require('./QRCodeController');
+
 const sendMail = require('../config/sendMail')
 interface PayPalLink {
   href: string
@@ -41,6 +42,15 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const ticketNumber = event.ticket_number ?? 0
 
     const seatCount = seatcode.length
+
+    if (ticketNumber > seatCount) {
+      return res.status(400).json({
+        status: false,
+        code: 400,
+        message: 'Not enough tickets available',
+        result: null
+      })
+    }
 
     const order = new Order({
       seat_code: seatcode,
@@ -124,6 +134,7 @@ const captureOrder = asyncHandler(async (req: Request, res: Response) => {
   try {
     const captureOrderResponse = await paypalClient.client().execute(request)
 
+
     if (captureOrderResponse.result.status === 'COMPLETED') {
       const orderId = captureOrderResponse.result.purchase_units[0].reference_id
       const order = await Order.findById(orderId)
@@ -155,6 +166,7 @@ const captureOrder = asyncHandler(async (req: Request, res: Response) => {
         result: null
       })
     }
+
 
     console.error('Error capturing order:', error)
     return res.status(500).json({
@@ -249,14 +261,6 @@ const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
 
 const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
   const { orderId } = req.params;
-
-
-
-
-
-
-
-
   try {
     // Lấy thông tin đơn hàng
     const order = await Order.findById(orderId)
@@ -277,10 +281,6 @@ const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
         result: null,
       });
     }
-
-
-
-
 
     // Dữ liệu QR
     const qrData = `
@@ -315,17 +315,13 @@ const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
       <img src="${qrCodeUrl}" alt="QR Code" />
     `;
 
-
-
-
-
-
     // Gửi email
     await sendMail({
       email: order.customer.email,
       html: htmlContent,
       type: 'order_details',
     });
+
 
     res.status(200).json({
       status: true,
@@ -335,6 +331,7 @@ const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error sending order email:', error);
+
     res.status(500).json({
       status: false,
       code: 500,
@@ -343,10 +340,6 @@ const sendOrderEmail = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 });
-
-
-
-
 
 
 module.exports = {

@@ -1,19 +1,19 @@
 export enum Role {
-    ROLE_USER = 'ROLE_USER',
-    ROLE_ADMIN = 'ROLE_ADMIN',
-    ROLE_ORGANIZER = 'ROLE_ORGANIZER',
+  ROLE_USER = 'ROLE_USER',
+  ROLE_ADMIN = 'ROLE_ADMIN',
+  ROLE_ORGANIZER = 'ROLE_ORGANIZER'
 }
 
 export enum TypeUser {
-    USER = 'User',
-    ADMIN = 'Admin',
-    ORGANIZER = 'Organizer',
+  USER = 'User',
+  ADMIN = 'Admin',
+  ORGANIZER = 'Organizer'
 }
 
 export enum Status {
-    PROCESSING = 'Processing',
-    ACCEPTED = 'Accepted',
-    REJECTED = 'Rejected',
+  PROCESSING = 'Processing',
+  ACCEPTED = 'Accepted',
+  REJECTED = 'Rejected'
 }
 
 // export enum EventTicket {
@@ -23,20 +23,27 @@ export enum Status {
 // }
 
 export enum EventType {
-    MUSIC = 'Music',
-    DRAMATIC = 'Dramatic',
-    WORKSHOP = 'Workshop',
+  MUSIC = 'Music',
+  DRAMATIC = 'Dramatic',
+  WORKSHOP = 'Workshop'
 }
 
 export enum EventStatus {
-    CANCELLED = "Cancelled",
-    PENDING = "Pending",
-    SUCCESSED = "Successed",
-    OVER_DATE = 'Overdated',
+  CANCELLED = 'Cancel',
+  PENDING = 'Pending',
+  ACCEPTED = 'Accept',
+  OVER_DATE = 'Overdated'
 }
 
 export enum OrderStatus {
-    CANCELLED = "Cancelled",
-    PENDING = "Pending",
-    SUCCESSED = "Successed",
+  CANCELLED = 'Cancel',
+  PENDING = 'Pending',
+  ACCEPTED = 'Accept'
+}
+
+export enum SeatStatus {
+  CANCELLED = 'Cancel',
+  PENDING = 'Pending',
+  ACCEPTED = 'Accept',
+  OVER_DATE = 'Overdated'
 }
