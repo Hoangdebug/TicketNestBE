@@ -431,6 +431,7 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
         contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id})
     user.organizerRef = response._id
     await user.save()
+
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
