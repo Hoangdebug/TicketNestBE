@@ -5,7 +5,7 @@ const favouriteSchema = new mongoose.Schema({
         user: { type: mongoose.Types.ObjectId, ref: "User" },
     },
     eventname: {
-        event: { type: mongoose.Types.ObjectId, ref: "Event" },
+        event: { type: mongoose.Types.ObjectId, ref: "EventModel" },
     },
 });
 

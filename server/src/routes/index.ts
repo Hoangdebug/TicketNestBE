@@ -22,8 +22,10 @@ const initRoutes = (app: Application) => {
     app.use("/api/favourites", favouriteRouter); 
     app.use('/api/comment', commentRouter)
     app.use('/api/rating', ratingRouter)
-    app.use(notFound);
-    app.use(errHandler);
-};
+    app.use(notFound)
+    app.use(errHandler)
+}
+=
 
 module.exports = initRoutes;
+// rồi đó a sửa đi
