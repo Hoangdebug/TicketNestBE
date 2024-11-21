@@ -40,7 +40,7 @@ const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const ticketNumber = event.ticket_number ?? 0
 
     const seatCount = seatcode.length
-    if (ticketNumber < seatCount) {
+    if (ticketNumber > seatCount) {
       return res.status(400).json({
         status: false,
         code: 400,
