@@ -9,7 +9,6 @@ const adminRouter = require("./adminRouter");
 const favouriteRouter = require("./favouriteRouter");
 const commentRouter = require("./commentRouter")
 const ratingRouter = require("./ratingRouter")
-
 const { notFound, errHandler } = require("../middlewares/errorHandler");
 
 const initRoutes = (app: Application) => {
@@ -26,7 +25,7 @@ const initRoutes = (app: Application) => {
     app.use(notFound)
     app.use(errHandler)
 }
-
+=
 
 module.exports = initRoutes;
 // rồi đó a sửa đi

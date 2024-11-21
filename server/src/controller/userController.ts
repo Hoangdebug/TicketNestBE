@@ -175,6 +175,15 @@ const login = asyncHandler( async (req: Request, res: Response) => {
     }
 })
 
+const authGoogle = asyncHandler( async (req: Request, res: Response) => {
+    const accessToken = generateAccessToken(req.user._id, req.user.role)
+    console.log("CONTROLLER___:",accessToken)
+    return res.status(200).json({
+        success: true,
+        code: 200,
+        accessToken,
+    })
+})
 
 const getCurrent = asyncHandler( async (req: Request, res: Response) => {
     const { _id } = req.user
@@ -431,6 +440,22 @@ const userRequestOrganizer = asyncHandler(async(req: Request, res: Response) => 
         contact_email: contact_email, contact_phone: contact_phone , sponsor_by: _id})
     user.organizerRef = response._id
     await user.save()
+
+    const htmlContent = `
+      <h1>Order Details</h1>
+      <p><strong>Customer Name:</strong> ${user.username}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Phone:</strong> ${user.phone}</p>
+      <h2>Thank you for requesting to us. We are going to reply to your question soon.</h2>
+    `;
+
+    // Gửi email
+    await sendMail({
+      email: user.email,
+      html: htmlContent,
+      type: 'sendRequesting',
+    });
+    
     return res.status(200).json({
         status: response ? true : false,
         code: response ? 200 : 400,
@@ -590,5 +615,6 @@ module.exports = {
     uploadImage,
     updateRolebyAdmin,
     userRequestOrganizer,
-    organizerPermitByAdmin
+    organizerPermitByAdmin,
+    authGoogle
 }

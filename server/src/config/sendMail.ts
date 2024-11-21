@@ -35,6 +35,9 @@ const sendMail = asyncHandler(async ({email, html, type} : {email: string, html:
         case 'order_details':
             subject = "Your Order Details from TicketNest";
             break;
+        case 'sendRequesting':
+            subject = "Your Request to be an Organizer";
+            break;   
         default:
             throw new Error('Invalid email type');
     }
