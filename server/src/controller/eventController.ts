@@ -12,6 +12,34 @@ const Event = require('../models/event')
 const User = require('../models/user');
 const Organizer = require('../models/organizer');
 
+const searchEvents = asyncHandler(async (req: Request, res: Response) => {
+    const { keyword } = req.query;
+
+    if (!keyword || typeof keyword !== 'string') {
+        return res.status(400).json({
+            status: false,
+            code: 400,
+            message: 'Invalid search keyword',
+            result: [],
+        });
+    }
+
+    const searchRegex = new RegExp(keyword, 'i'); 
+
+    const events = await EventModel.find({
+        $or: [
+            { name: { $regex: searchRegex } },
+            { location: { $regex: searchRegex } },
+        ],
+    });
+
+    return res.status(200).json({
+        status: true,
+        code: 200,
+        message: 'Search results fetched successfully',
+        result: events,
+    });
+});
 
 //Create EventModel
 const createEvent = asyncHandler(async (req: Request, res: Response) => {
@@ -301,6 +329,7 @@ export const checkAndUpdateEventStatus = async () => {
 
 
 export {
+    searchEvents,
     createEvent,
     readEvent,
     getAllEvents,

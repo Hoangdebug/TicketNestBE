@@ -5,6 +5,7 @@ const { verifyAccessToken, isAdmin, isOrganizer } = require('../middlewares/veri
 const uploadCloud = require('../config/cloudinary.config')
 
 router.post('/', [verifyAccessToken], ctrls.createEvent);
+router.get('/search', ctrls.searchEvents);
 router.get('/all', ctrls.getAllEvents)
 router.get('/get-event', [verifyAccessToken, isOrganizer], ctrls.getEventByOrganizer);
 router.get('/statistic/event', [verifyAccessToken, isOrganizer], ctrls.staticEventFollowByMonth);
