@@ -25,7 +25,6 @@ const initRoutes = (app: Application) => {
     app.use(notFound)
     app.use(errHandler)
 }
-=
 
 module.exports = initRoutes;
 // rồi đó a sửa đi
